@@ -1,0 +1,24 @@
+name: Installers
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  shell:
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: bash -n install.sh
+      - run: python3 tests/install.py
+  powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test Windows PowerShell 5.1
+        shell: powershell
+        run: ./tests/install.ps1
+      - name: Test PowerShell 7
+        shell: pwsh
+        run: ./tests/install.ps1
