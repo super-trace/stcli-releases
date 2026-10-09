@@ -3,6 +3,13 @@
 Prebuilt stcli packages for macOS, Linux, and WSL. No Go installation or GitHub
 login required.
 
+> **Public launch:** This repository and `super-trace/ac6-workshop-lab` will both
+> become public. These installation instructions are written for that public state;
+> anonymous downloads will work once visibility changes. At launch, update both
+> READMEs, replace the workshop's authenticated `gh api` installer download with
+> the public `curl` command below, remove private-repository access requirements,
+> and test installation without GitHub login.
+
 ## Install
 
 Run in your macOS, Linux, or WSL terminal:
