@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v5
-      - run: bash -n install.sh
+      - run: sh -n install.sh
       - run: python3 tests/install.py
   # Native Windows distribution is paused. Keep tests for re-enabling later.
   # powershell:
