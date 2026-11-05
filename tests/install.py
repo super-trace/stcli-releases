@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import tarfile
@@ -39,9 +40,9 @@ def write_archive(archive):
 
 
 def user_path():
-    out = subprocess.check_output(['reg', 'query', r'HKCU\Environment', '/v', 'Path'], text=True)
-    _, kind, value = out.split()[-3:] if 'REG_' in out else (None, 'REG_EXPAND_SZ', '')
-    return kind, value
+    out = subprocess.run(['reg', 'query', r'HKCU\Environment', '/v', 'Path'], capture_output=True, text=True).stdout
+    match = re.search(r'^\s*Path\s+(REG_\w+)\s+(.*?)\s*$', out, re.MULTILINE)
+    return match.groups() if match else ('REG_EXPAND_SZ', '')
 
 
 def restore_user_path(kind, value):
