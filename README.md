@@ -1,7 +1,7 @@
 # Install stcli
 
-Prebuilt stcli packages for macOS, Linux, and WSL. No Go installation or GitHub
-login required.
+Prebuilt stcli packages for macOS, Linux, WSL, and Windows. No Go installation
+or GitHub login required.
 
 > **Public launch:** This repository and `super-trace/ac6-workshop-lab` will both
 > become public. These installation instructions are written for that public state;
@@ -18,11 +18,18 @@ Run in your macOS, Linux, or WSL terminal:
 curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh | sh
 ```
 
-macOS uses one universal executable for Intel and Apple Silicon. Linux and WSL
-support x86-64 and ARM64. Native Windows packages are paused; use WSL for now.
+Or in PowerShell on Windows:
 
-Installs the latest release to `~/.stcli/bin/stcli`, without sudo, and adds that
-directory to `PATH` in your shell profile if it is not already there. Re-run the
+```powershell
+irm https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.ps1 | iex
+```
+
+macOS uses one universal executable for Intel and Apple Silicon. Linux, WSL, and
+Windows support x86-64 and ARM64.
+
+Installs the latest release to `~/.stcli/bin/stcli` (`%USERPROFILE%\.stcli\bin\stcli.exe`
+on Windows), without administrator rights, and adds that directory to `PATH` in
+your shell profile or user environment if it is not already there. Re-run the
 command to upgrade.
 
 To choose a version or installation directory:
@@ -30,6 +37,10 @@ To choose a version or installation directory:
 ```sh
 STCLI_VERSION=2026.10.09 sh -c "$(curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh)"
 STCLI_INSTALL_DIR="$HOME/bin" sh -c "$(curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh)"
+```
+
+```powershell
+$env:STCLI_VERSION = "2026.10.09"; irm https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.ps1 | iex
 ```
 
 Set `GITHUB_TOKEN` to raise the GitHub API rate limit, for example in CI.
@@ -47,9 +58,9 @@ implemented yet.
 
 ## Releases and verification
 
-CI builds three packages: macOS universal and Linux amd64/arm64. Verified
-archives, `checksums.txt`, and `provenance.json` are uploaded to a draft release,
-then published once every upload succeeds.
+CI builds five packages: macOS universal, Linux amd64/arm64, and Windows
+amd64/arm64. Verified archives, `checksums.txt`, and `provenance.json` are
+uploaded to a draft release, then published once every upload succeeds.
 
 Versions use the UTC date: `vYYYY.MM.DD`, with `.2`, `.3`, etc. for additional
 releases that day. Installers accept the version without `v`. Build provenance
@@ -58,7 +69,7 @@ records the commit and toolchain. The Homebrew formula is maintained separately.
 The installer checks the archive's SHA-256 before replacing an installation.
 Checksums detect corrupt downloads; they are not independent publisher
 signatures. macOS executables are ad-hoc signed, not Developer ID signed or
-notarized.
+notarized; Windows executables are unsigned, so SmartScreen may warn on first run.
 
 ## Uninstall
 
@@ -66,6 +77,11 @@ notarized.
 rm "$HOME/.stcli/bin/stcli"
 ```
 
+```powershell
+Remove-Item "$env:USERPROFILE\.stcli\bin\stcli.exe"
+```
+
 If you selected a different installation directory, remove `stcli` there instead,
-and drop the `PATH` line the installer added to your shell profile. Credentials
+and drop the `PATH` entry the installer added to your shell profile or user
+environment. Credentials
 and SSH configuration are kept separately and are not removed.
