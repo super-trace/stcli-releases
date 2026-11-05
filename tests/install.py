@@ -42,8 +42,8 @@ def write_fixture(archive):
 
 def user_path():
     out = subprocess.run(['reg', 'query', r'HKCU\Environment', '/v', 'Path'], capture_output=True, text=True).stdout
-    match = re.search(r'^\s*Path\s+(REG_\w+)\s+(.*?)\s*$', out, re.MULTILINE)
-    return match.groups() if match else ('REG_EXPAND_SZ', '')
+    match = re.search(r'^\s*Path\s+(REG_\w+)\s+(.*?)\s*$', out, re.MULTILINE | re.IGNORECASE)
+    return match.groups() if match else None
 
 
 def restore_user_path(kind, value):
@@ -105,6 +105,6 @@ with tempfile.TemporaryDirectory(prefix='stcli-install-') as directory:
                 subprocess.run(shell, env=fish, check=True)
                 assert (home / '.config/fish/config.fish').read_text().count(f'set -gx PATH "{bin_dir}" $PATH') == 1
     finally:
-        if windows: restore_user_path(*original)
+        if windows and original: restore_user_path(*original)
     server.shutdown()
     print(f'{len(shells)} shell(s): install, reinstall, spaces, PATH setup, checksum rejection, and pinned version passed')
