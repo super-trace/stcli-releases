@@ -72,14 +72,17 @@ with tempfile.TemporaryDirectory(prefix='stcli-install-') as directory:
     bin_dir = root / 'bin with spaces'
     env = dict(os.environ, HOME=str(home), SHELL='/bin/zsh', GITHUB_API_URL=url, GITHUB_SERVER_URL=url, STCLI_INSTALL_DIR=str(bin_dir))
     if windows:
-        shells = [[s, '-NoProfile', '-File', str(root_dir / 'install.ps1')] for s in ['powershell', 'pwsh'] if shutil.which(s)]
+        # A PowerShell 7 parent hides Windows PowerShell's own modules (Get-FileHash, Expand-Archive).
+        env5 = dict(env, PSModulePath=os.path.expandvars(r'%ProgramFiles%\WindowsPowerShell\Modules;%SystemRoot%\System32\WindowsPowerShell\v1.0\Modules'))
+        shells = [([s, '-NoProfile', '-File', str(root_dir / 'install.ps1')], env5 if s == 'powershell' else env)
+                  for s in ['powershell', 'pwsh'] if shutil.which(s)]
         assert shells, 'no PowerShell found'
         original = user_path()
     else:
         env['PATH'] = '/usr/bin:/bin'
-        shells = [['sh', str(root_dir / 'install.sh')]]
+        shells = [(['sh', str(root_dir / 'install.sh')], env)]
     try:
-        for shell in shells:
+        for shell, env in shells:
             for _ in range(2): subprocess.run(shell, env=env, check=True)
             executable = bin_dir / ('stcli.exe' if windows else 'stcli')
             if windows:
