@@ -9,7 +9,7 @@ NEEDS_SOURCE=false
 
 main() {
   detect_platform
-  get_latest_version
+  get_version
   download_and_verify
   install_binary
   setup_path
@@ -17,7 +17,9 @@ main() {
 }
 
 fail() {
-  printf 'Error: %s\n' "$@" >&2
+  printf 'Error: %s\n' "$1" >&2
+  shift
+  [ $# -eq 0 ] || printf '%s\n' "$@" >&2
   exit 1
 }
 
@@ -71,19 +73,16 @@ http_download() {
   fi
 }
 
-get_latest_version() {
-  LATEST_VERSION=$(http_get "$API_URL/repos/${GITHUB_REPO}/releases/latest" | \
-    sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
-
-  if [ -z "$LATEST_VERSION" ]; then
-    fail "could not determine latest version." "Check your internet connection or try again later."
-  fi
-
+get_version() {
   if [ -n "${STCLI_VERSION:-}" ]; then
     VERSION=$(echo "$STCLI_VERSION" | sed 's/^v//')
-    echo "Installing requested version: v$VERSION (latest is v$LATEST_VERSION)"
+    echo "Installing requested version: v$VERSION"
   else
-    VERSION="$LATEST_VERSION"
+    VERSION=$(http_get "$API_URL/repos/${GITHUB_REPO}/releases/latest" | \
+      sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
+    if [ -z "$VERSION" ]; then
+      fail "could not determine latest version." "Check your internet connection or try again later."
+    fi
     echo "Latest version: v$VERSION"
   fi
   if ! printf '%s\n' "$VERSION" | LC_ALL=C grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]*$'; then
@@ -96,7 +95,7 @@ download_and_verify() {
   BASE_URL="$SERVER_URL/${GITHUB_REPO}/releases/download/v${VERSION}"
 
   TMP_DIR=$(mktemp -d)
-  trap 'rm -rf "$TMP_DIR"' EXIT
+  trap 'rm -rf "$TMP_DIR" "${STAGED:-}"' EXIT
 
   echo "Downloading stcli v${VERSION}..."
   http_download "$BASE_URL/checksums.txt" "$TMP_DIR/checksums.txt"
@@ -131,8 +130,12 @@ download_and_verify() {
 
 install_binary() {
   mkdir -p "$INSTALL_DIR"
-  mv "$TMP_DIR/stcli" "$INSTALL_DIR/stcli"
-  chmod +x "$INSTALL_DIR/stcli"
+  # Stage next to the target so the final move is a rename, never a partial copy.
+  STAGED=$(mktemp "$INSTALL_DIR/.stcli.XXXXXX")
+  cp "$TMP_DIR/stcli" "$STAGED"
+  chmod 755 "$STAGED"
+  mv -f "$STAGED" "$INSTALL_DIR/stcli"
+  STAGED=""
 
   if command -v brew >/dev/null 2>&1; then
     BREW_STCLI=$(brew --prefix 2>/dev/null)/bin/stcli
@@ -165,13 +168,14 @@ setup_path() {
 
   EXPORT_LINE="export PATH=\"$INSTALL_DIR:\$PATH\""
   if [ "$SHELL_NAME" = "fish" ]; then
-    EXPORT_LINE="set -gx PATH $INSTALL_DIR \$PATH"
+    EXPORT_LINE="set -gx PATH \"$INSTALL_DIR\" \$PATH"
   fi
 
   if [ -f "$PROFILE" ] && grep -qF "$INSTALL_DIR" "$PROFILE" 2>/dev/null; then
     return
   fi
 
+  mkdir -p "$(dirname "$PROFILE")"
   echo "" >> "$PROFILE"
   echo "$EXPORT_LINE" >> "$PROFILE"
   echo "Added $INSTALL_DIR to PATH in $PROFILE"
@@ -182,11 +186,6 @@ print_success() {
   echo ""
   echo "stcli v${VERSION} installed to $INSTALL_DIR/stcli"
   echo ""
-  if [ "$VERSION" != "$LATEST_VERSION" ]; then
-    echo "Note: You installed v${VERSION}, but the latest is v${LATEST_VERSION}."
-    echo "Re-run this installer without STCLI_VERSION to upgrade."
-    echo ""
-  fi
   if [ "$NEEDS_SOURCE" = "true" ]; then
     echo "Run 'source $PROFILE' or open a new terminal, then:"
   fi

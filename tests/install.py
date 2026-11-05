@@ -49,9 +49,15 @@ with tempfile.TemporaryDirectory(prefix='stcli-install-') as directory:
     profile = (home / '.zshrc').read_text()
     assert profile.count(f'export PATH="{bin_dir}:$PATH"') == 1
     before = executable.read_bytes()
+    good = archive.read_bytes()
     archive.write_bytes(b'corrupt')
     rejected = subprocess.run(['sh', str(installer)], env=env, capture_output=True, text=True)
     assert rejected.returncode and 'checksum verification failed' in rejected.stderr
     assert executable.read_bytes() == before
+    fish = dict(env, SHELL='/usr/bin/fish', STCLI_VERSION='test')
+    (api / 'latest').unlink()
+    archive.write_bytes(good)
+    subprocess.run(['sh', str(installer)], env=fish, check=True)
+    assert (home / '.config/fish/config.fish').read_text().count(f'set -gx PATH "{bin_dir}" $PATH') == 1
     server.shutdown()
-    print('Install, reinstall, spaces, executable mode, PATH setup, and checksum rejection passed')
+    print('Install, reinstall, spaces, executable mode, PATH setup, checksum rejection, pinned version, and fish profile passed')
