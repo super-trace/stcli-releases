@@ -60,19 +60,12 @@ Checksums detect corrupt downloads; they are not independent publisher
 signatures. macOS executables are ad-hoc signed, not Developer ID signed or
 notarized.
 
-For offline installation, download the matching archive and `checksums.txt`
-from [Releases](https://github.com/super-trace/stcli-releases/releases) into one
-directory, then run:
-
-```sh
-STCLI_ASSET_DIR=/path/to/packages STCLI_VERSION=2026.10.09 bash /tmp/stcli-install.sh
-```
-
 ## Uninstall
 
 ```sh
-rm "$HOME/.local/bin/stcli"
+rm "$HOME/.stcli/bin/stcli"
 ```
 
-If you selected a different installation directory, remove `stcli` there instead.
-Credentials and SSH configuration are kept separately and are not removed.
+If you selected a different installation directory, remove `stcli` there instead,
+and drop the `PATH` line the installer added to your shell profile. Credentials
+and SSH configuration are kept separately and are not removed.
