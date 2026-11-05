@@ -28,15 +28,16 @@ def fixture_target():
     return 'darwin_universal' if system == 'Darwin' else 'linux_' + ('arm64' if machine in ['arm64', 'aarch64'] else 'amd64')
 
 
-def write_archive(archive):
+def write_fixture(archive):
     if windows:
         with zipfile.ZipFile(archive, 'w') as bundle:
             bundle.writestr('stcli.exe', payload)
-        return
-    with tarfile.open(archive, 'w:gz') as bundle:
-        info = tarfile.TarInfo('stcli')
-        info.size, info.mode = len(payload), 0o755
-        bundle.addfile(info, io.BytesIO(payload))
+    else:
+        with tarfile.open(archive, 'w:gz') as bundle:
+            info = tarfile.TarInfo('stcli')
+            info.size, info.mode = len(payload), 0o755
+            bundle.addfile(info, io.BytesIO(payload))
+    (archive.parent / 'checksums.txt').write_text(f'{hashlib.sha256(archive.read_bytes()).hexdigest()}  {archive.name}\n')
 
 
 def user_path():
@@ -58,8 +59,7 @@ with tempfile.TemporaryDirectory(prefix='stcli-install-') as directory:
     api.mkdir(parents=True)
     (api / 'latest').write_text(json.dumps({'tag_name': 'vtest'}))
     archive = assets / f"stcli_test_{fixture_target()}.{'zip' if windows else 'tar.gz'}"
-    write_archive(archive)
-    (assets / 'checksums.txt').write_text(f'{hashlib.sha256(archive.read_bytes()).hexdigest()}  {archive.name}\n')
+    write_fixture(archive)
 
     class Handler(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *args): super().__init__(*args, directory=str(site))
@@ -97,7 +97,7 @@ with tempfile.TemporaryDirectory(prefix='stcli-install-') as directory:
             rejected = subprocess.run(shell, env=env, capture_output=True, text=True)
             assert rejected.returncode and 'hecksum verification failed' in rejected.stdout + rejected.stderr, rejected
             assert executable.read_bytes() == before
-            write_archive(archive)
+            write_fixture(archive)
             executable.unlink()
     finally:
         if windows: restore_user_path(*original)
