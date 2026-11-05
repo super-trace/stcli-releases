@@ -99,7 +99,12 @@ with tempfile.TemporaryDirectory(prefix='stcli-install-') as directory:
             assert executable.read_bytes() == before
             write_fixture(archive)
             executable.unlink()
+            if not windows:
+                fish = dict(env, SHELL='/usr/bin/fish', STCLI_VERSION='test')
+                (api / 'latest').unlink()
+                subprocess.run(shell, env=fish, check=True)
+                assert (home / '.config/fish/config.fish').read_text().count(f'set -gx PATH "{bin_dir}" $PATH') == 1
     finally:
         if windows: restore_user_path(*original)
     server.shutdown()
-    print(f'{len(shells)} shell(s): install, reinstall, spaces, PATH setup, and checksum rejection passed')
+    print(f'{len(shells)} shell(s): install, reinstall, spaces, PATH setup, checksum rejection, and pinned version passed')
