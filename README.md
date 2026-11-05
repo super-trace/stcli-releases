@@ -53,9 +53,9 @@ stcli login
 stcli user@device
 ```
 
-Use a terminal with SSH access to your device. Login opens a browser; Linux uses
-`xdg-open`, and WSL needs a browser bridge. Headless authentication is not
-implemented yet.
+Use a terminal with SSH access to your device. Login opens a browser when it
+can and always prints the sign-in URL, so on a headless machine or over SSH
+copy the URL into any browser.
 
 ## Releases and verification
 
