@@ -30,7 +30,8 @@ Windows support x86-64 and ARM64.
 Installs the latest release to `~/.stcli/bin/stcli` (`%USERPROFILE%\.stcli\bin\stcli.exe`
 on Windows), without administrator rights, and adds that directory to `PATH` in
 your shell profile or user environment if it is not already there. Re-run the
-command to upgrade.
+command to upgrade, and check what you have with `stcli version`, which prints
+the release version and the source commit, for example `2026.11.04 (c5ddc1f)`.
 
 To choose a version or installation directory:
 
@@ -58,13 +59,17 @@ implemented yet.
 
 ## Releases and verification
 
-CI builds five packages: macOS universal, Linux amd64/arm64, and Windows
-amd64/arm64. Verified archives, `checksums.txt`, and `provenance.json` are
-uploaded to a draft release, then published once every upload succeeds.
+A maintainer cuts a release from the Release workflow in
+[stcli](https://github.com/super-trace/stcli). It builds five packages, macOS
+universal, Linux amd64/arm64, and Windows amd64/arm64, with the version stamped
+into every executable. Verified archives, `checksums.txt`, and `provenance.json`
+are uploaded to a draft release here, published once every upload succeeds, and
+the built commit is tagged in stcli with the same version.
 
 Versions use the UTC date: `vYYYY.MM.DD`, with `.2`, `.3`, etc. for additional
-releases that day. Installers accept the version without `v`. Build provenance
-records the commit and toolchain. The Homebrew formula is maintained separately.
+releases that day; the workflow picks the next free one. Installers accept the
+version without `v`. Build provenance records the commit and toolchain. The
+Homebrew formula is maintained separately.
 
 The installer checks the archive's SHA-256 before replacing an installation.
 Checksums detect corrupt downloads; they are not independent publisher
@@ -83,5 +88,5 @@ Remove-Item "$env:USERPROFILE\.stcli\bin\stcli.exe"
 
 If you selected a different installation directory, remove `stcli` there instead,
 and drop the `PATH` entry the installer added to your shell profile or user
-environment. Credentials
-and SSH configuration are kept separately and are not removed.
+environment. Credentials and SSH configuration are kept separately and are not
+removed.
