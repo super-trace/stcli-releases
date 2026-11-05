@@ -1,86 +1,196 @@
-#!/usr/bin/env bash
-# User-level installer for macOS, Linux, and WSL. No sudo or shell-file edits.
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-repo=super-trace/stcli-releases
-version=${STCLI_VERSION:-latest}
-install_dir=${STCLI_INSTALL_DIR:-"$HOME/.local/bin"}
-asset_dir=${STCLI_ASSET_DIR:-}
-fail() { printf 'stcli: %s\n' "$*" >&2; exit 1; }
+INSTALL_DIR="${STCLI_INSTALL_DIR:-$HOME/.stcli/bin}"
+GITHUB_REPO="super-trace/stcli-releases"
+API_URL="${GITHUB_API_URL:-https://api.github.com}"
+SERVER_URL="${GITHUB_SERVER_URL:-https://github.com}"
+NEEDS_SOURCE=false
 
-case "$(uname -s)" in
-  Darwin) platform=darwin; arch=universal ;;
-  Linux)
-    platform=linux
-    case "$(uname -m)" in
-      x86_64|amd64) arch=amd64 ;;
-      aarch64|arm64) arch=arm64 ;;
-      *) fail 'Unsupported Linux architecture.' ;;
-    esac ;;
-  *) fail 'Use install.ps1 from PowerShell on native Windows.' ;;
-esac
-[[ "$version" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || fail 'Invalid version label.'
-[[ -n "$install_dir" ]] || fail 'Installation directory is empty.'
+main() {
+  detect_platform
+  get_version
+  download_and_verify
+  install_binary
+  setup_path
+  print_success
+}
 
-use_gh=false
-if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  use_gh=true
-fi
-if [[ "$version" == latest ]]; then
-  [[ -z "$asset_dir" ]] || fail 'Set STCLI_VERSION when installing offline.'
-  if "$use_gh"; then
-    version=$(gh release view --repo "$repo" --json tagName --jq .tagName)
+fail() {
+  printf 'Error: %s\n' "$1" >&2
+  shift
+  [ $# -eq 0 ] || printf '%s\n' "$@" >&2
+  exit 1
+}
+
+detect_platform() {
+  OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+  ARCH=$(uname -m)
+
+  case "$OS" in
+    darwin) ARCH_LABEL="universal" ;;
+    linux)
+      case "$ARCH" in
+        x86_64|amd64) ARCH_LABEL="amd64" ;;
+        arm64|aarch64) ARCH_LABEL="arm64" ;;
+        *) fail "unsupported architecture: $ARCH" "Supported: x86_64, arm64." ;;
+      esac
+      ;;
+    *) fail "unsupported operating system: $OS" "Supported: macOS, Linux, WSL. For Windows, use install.ps1." ;;
+  esac
+
+  echo "Detected: $OS $ARCH"
+}
+
+http_get() {
+  url="$1"
+  if command -v curl >/dev/null 2>&1; then
+    if [ -n "${GITHUB_TOKEN:-}" ]; then
+      curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" "$url"
+    else
+      curl -fsSL "$url"
+    fi
+  elif command -v wget >/dev/null 2>&1; then
+    if [ -n "${GITHUB_TOKEN:-}" ]; then
+      wget -qO- --header="Authorization: Bearer $GITHUB_TOKEN" "$url"
+    else
+      wget -qO- "$url"
+    fi
   else
-    command -v curl >/dev/null || fail 'Install curl or authenticate with gh first.'
-    url=$(curl -fsSL --proto '=https' --proto-redir '=https' -o /dev/null -w '%{url_effective}' \
-      "https://github.com/$repo/releases/latest") || fail 'Cannot find a release. Private downloads require gh auth login.'
-    [[ "$url" == "https://github.com/$repo/releases/tag/"* ]] || fail 'No latest release available.'
-    version=${url##*/}
+    fail "curl or wget is required but neither is installed."
   fi
-fi
-version=${version#v}
-[[ "$version" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || fail 'Release returned an invalid version.'
-archive="stcli_${version}_${platform}_${arch}.tar.gz"
-work=$(mktemp -d)
-staged=
-cleanup() { rm -rf "$work"; [[ -z "$staged" ]] || rm -f "$staged"; }
-trap cleanup EXIT
+}
 
-if [[ -n "$asset_dir" ]]; then
-  cp "$asset_dir/$archive" "$asset_dir/checksums.txt" "$work/"
-elif "$use_gh"; then
-  gh release download "v$version" --repo "$repo" --dir "$work" \
-    --pattern "$archive" --pattern checksums.txt
-else
-  for name in "$archive" checksums.txt; do
-    curl -fsSL --proto '=https' --proto-redir '=https' \
-      "https://github.com/$repo/releases/download/v$version/$name" -o "$work/$name" \
-      || fail 'Download failed. Private downloads require gh auth login.'
-  done
-fi
+http_download() {
+  url="$1"
+  output="$2"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL -o "$output" "$url"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q -O "$output" "$url"
+  else
+    fail "curl or wget is required but neither is installed."
+  fi
+}
 
-expected=$(awk -v name="$archive" '$2 == name {print $1}' "$work/checksums.txt")
-[[ "$expected" =~ ^[0-9a-fA-F]{64}$ ]] || fail 'Missing or ambiguous SHA-256 checksum.'
-if command -v sha256sum >/dev/null 2>&1; then
-  actual=$(sha256sum "$work/$archive"); actual=${actual%% *}
-elif command -v shasum >/dev/null 2>&1; then
-  actual=$(shasum -a 256 "$work/$archive"); actual=${actual%% *}
-else
-  fail 'Install sha256sum or shasum first.'
-fi
-[[ "$actual" == "$expected" ]] || fail 'Checksum mismatch; existing installation left untouched.'
-[[ "$(tar -tzf "$work/$archive")" == stcli ]] || fail 'Unexpected archive contents.'
-tar -xzf "$work/$archive" -C "$work"
-[[ -f "$work/stcli" && ! -L "$work/stcli" ]] || fail 'Archive did not contain a regular executable.'
-mkdir -p "$install_dir"
-staged=$(mktemp "$install_dir/.stcli.XXXXXX")
-install -m 755 "$work/stcli" "$staged"
-mv -f "$staged" "$install_dir/stcli"
-staged=
-printf 'Installed stcli %s to %s/stcli\n' "$version" "$install_dir"
-case ":$PATH:" in
-  *":$install_dir:"*) ;;
-  *) printf 'Add this directory to your PATH: %s\n' "$install_dir"
-     printf 'For this terminal: export PATH="%s:$PATH"\n' "$install_dir" ;;
-esac
-printf 'Run: stcli login\n'
+get_version() {
+  if [ -n "${STCLI_VERSION:-}" ]; then
+    VERSION=$(echo "$STCLI_VERSION" | sed 's/^v//')
+    echo "Installing requested version: v$VERSION"
+  else
+    VERSION=$(http_get "$API_URL/repos/${GITHUB_REPO}/releases/latest" | \
+      sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
+    if [ -z "$VERSION" ]; then
+      fail "could not determine latest version." "Check your internet connection or try again later."
+    fi
+    echo "Latest version: v$VERSION"
+  fi
+  if ! printf '%s\n' "$VERSION" | LC_ALL=C grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]*$'; then
+    fail "invalid release version."
+  fi
+}
+
+download_and_verify() {
+  ARCHIVE="stcli_${VERSION}_${OS}_${ARCH_LABEL}.tar.gz"
+  BASE_URL="$SERVER_URL/${GITHUB_REPO}/releases/download/v${VERSION}"
+
+  TMP_DIR=$(mktemp -d)
+  trap 'rm -rf "$TMP_DIR" "${STAGED:-}"' EXIT
+
+  echo "Downloading stcli v${VERSION}..."
+  http_download "$BASE_URL/checksums.txt" "$TMP_DIR/checksums.txt"
+
+  echo "Verifying checksum..."
+  EXPECTED=$(awk -v asset="$ARCHIVE" 'NF == 2 && $2 == asset { print $1 }' "$TMP_DIR/checksums.txt")
+  if ! printf '%s\n' "$EXPECTED" | LC_ALL=C grep -Eq '^[a-fA-F0-9]{64}$' ||
+     [ "$(printf '%s\n' "$EXPECTED" | wc -l | tr -d ' ')" != "1" ]; then
+    fail "missing, invalid, or duplicate checksum for $ARCHIVE"
+  fi
+  EXPECTED=$(printf '%s' "$EXPECTED" | tr '[:upper:]' '[:lower:]')
+
+  http_download "$BASE_URL/$ARCHIVE" "$TMP_DIR/$ARCHIVE"
+
+  if command -v sha256sum >/dev/null 2>&1; then
+    ACTUAL=$(sha256sum "$TMP_DIR/$ARCHIVE" | cut -d' ' -f1)
+  elif command -v shasum >/dev/null 2>&1; then
+    ACTUAL=$(shasum -a 256 "$TMP_DIR/$ARCHIVE" | cut -d' ' -f1)
+  else
+    fail "sha256sum or shasum is required to verify the download."
+  fi
+
+  if [ "$ACTUAL" != "$EXPECTED" ]; then
+    fail "checksum verification failed." "  Expected: $EXPECTED" "  Actual:   $ACTUAL" \
+      "The downloaded file may be corrupted. Please try again."
+  fi
+
+  echo "Checksum verified."
+
+  tar -xzf "$TMP_DIR/$ARCHIVE" -C "$TMP_DIR"
+}
+
+install_binary() {
+  mkdir -p "$INSTALL_DIR"
+  # Stage next to the target so the final move is a rename, never a partial copy.
+  STAGED=$(mktemp "$INSTALL_DIR/.stcli.XXXXXX")
+  cp "$TMP_DIR/stcli" "$STAGED"
+  chmod 755 "$STAGED"
+  mv -f "$STAGED" "$INSTALL_DIR/stcli"
+  STAGED=""
+
+  if command -v brew >/dev/null 2>&1; then
+    BREW_STCLI=$(brew --prefix 2>/dev/null)/bin/stcli
+    if [ -f "$BREW_STCLI" ]; then
+      echo ""
+      echo "Note: stcli is also installed via Homebrew at $BREW_STCLI"
+      echo "You may want to run 'brew uninstall stcli' to avoid confusion."
+    fi
+  fi
+}
+
+setup_path() {
+  case ":$PATH:" in
+    *":$INSTALL_DIR:"*) return ;;
+  esac
+
+  SHELL_NAME=$(basename "${SHELL:-sh}")
+  case "$SHELL_NAME" in
+    zsh)  PROFILE="$HOME/.zshrc" ;;
+    bash)
+      if [ -f "$HOME/.bashrc" ]; then
+        PROFILE="$HOME/.bashrc"
+      else
+        PROFILE="$HOME/.bash_profile"
+      fi
+      ;;
+    fish) PROFILE="$HOME/.config/fish/config.fish" ;;
+    *)    PROFILE="$HOME/.profile" ;;
+  esac
+
+  EXPORT_LINE="export PATH=\"$INSTALL_DIR:\$PATH\""
+  if [ "$SHELL_NAME" = "fish" ]; then
+    EXPORT_LINE="set -gx PATH \"$INSTALL_DIR\" \$PATH"
+  fi
+
+  if [ -f "$PROFILE" ] && grep -qF "$INSTALL_DIR" "$PROFILE" 2>/dev/null; then
+    return
+  fi
+
+  mkdir -p "$(dirname "$PROFILE")"
+  echo "" >> "$PROFILE"
+  echo "$EXPORT_LINE" >> "$PROFILE"
+  echo "Added $INSTALL_DIR to PATH in $PROFILE"
+  NEEDS_SOURCE=true
+}
+
+print_success() {
+  echo ""
+  echo "stcli v${VERSION} installed to $INSTALL_DIR/stcli"
+  echo ""
+  if [ "$NEEDS_SOURCE" = "true" ]; then
+    echo "Run 'source $PROFILE' or open a new terminal, then:"
+  fi
+  echo "  stcli login    — authenticate with your Supertrace account"
+  echo "  stcli --help   — see available commands"
+}
+
+main
