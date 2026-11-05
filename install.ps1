@@ -1,107 +1,173 @@
-# Native Windows user-level installer. Windows PowerShell 5.1 or PowerShell 7.
-param(
-    [string]$Version = 'latest',
-    [string]$InstallDirectory = (Join-Path $env:LOCALAPPDATA 'Supertrace\stcli\bin'),
-    [string]$AssetDirectory = '',
-    [switch]$NoPathUpdate
-)
-$ErrorActionPreference = 'Stop'
-$repo = 'super-trace/stcli-releases'
-if ($env:OS -ne 'Windows_NT') { throw 'Use install.sh on macOS, Linux, or WSL.' }
-if ($Version -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]*$') { throw 'Invalid version label.' }
-if ([string]::IsNullOrWhiteSpace($InstallDirectory)) { throw 'Installation directory is empty.' }
-$machine = $env:PROCESSOR_ARCHITEW6432
-if (-not $machine) { $machine = $env:PROCESSOR_ARCHITECTURE }
-switch ($machine) {
-    'AMD64' { $arch = 'amd64' }
-    'ARM64' { $arch = 'arm64' }
-    default { throw "Unsupported Windows architecture: $machine" }
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+
+$InstallDir = if ($env:STCLI_INSTALL_DIR) { $env:STCLI_INSTALL_DIR } else { Join-Path $env:USERPROFILE ".stcli\bin" }
+$GitHubRepo = "super-trace/stcli-releases"
+$ApiUrl = if ($env:GITHUB_API_URL) { $env:GITHUB_API_URL } else { "https://api.github.com" }
+$ServerUrl = if ($env:GITHUB_SERVER_URL) { $env:GITHUB_SERVER_URL } else { "https://github.com" }
+
+function Get-ApiHeaders {
+    $headers = @{ "User-Agent" = "stcli-installer" }
+    if ($env:GITHUB_TOKEN) { $headers["Authorization"] = "Bearer $env:GITHUB_TOKEN" }
+    return $headers
 }
-# Windows PowerShell 5.1 may otherwise negotiate legacy TLS defaults.
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$useGh = $false
-if (-not $AssetDirectory -and (Get-Command gh -ErrorAction SilentlyContinue)) {
-    $previousErrorPreference = $ErrorActionPreference
-    try {
-        # Windows PowerShell treats redirected native stderr as an ErrorRecord.
-        # Missing gh login should select public HTTPS, not terminate installation.
-        $ErrorActionPreference = 'Continue'
-        & gh auth status *> $null
-        $useGh = ($LASTEXITCODE -eq 0)
-    } finally { $ErrorActionPreference = $previousErrorPreference }
-}
-if ($Version -eq 'latest') {
-    if ($AssetDirectory) { throw 'Set -Version when installing offline.' }
-    if ($useGh) {
-        $Version = & gh release view --repo $repo --json tagName --jq '.tagName'
-        if ($LASTEXITCODE -ne 0) { throw 'Cannot find a release.' }
-    } else {
-        $release = Invoke-RestMethod "https://api.github.com/repos/$repo/releases/latest"
-        $Version = $release.tag_name
+
+function Detect-Platform {
+    if ($env:OS -ne "Windows_NT") { throw "Use install.sh on macOS, Linux, or WSL." }
+    $machine = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }
+    switch ($machine) {
+        "AMD64" { $script:ArchLabel = "amd64" }
+        "ARM64" { $script:ArchLabel = "arm64" }
+        default { throw "Unsupported architecture: $machine. Supported: AMD64, ARM64." }
     }
+    # Windows PowerShell 5.1 may otherwise negotiate legacy TLS defaults.
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Write-Host "Detected: windows $script:ArchLabel"
 }
-$Version = $Version -replace '^v', ''
-if ($Version -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]*$') { throw 'Release returned an invalid version.' }
-$archive = "stcli_${Version}_windows_${arch}.zip"
-$work = Join-Path ([IO.Path]::GetTempPath()) ([Guid]::NewGuid().ToString())
-$staged = $null
-$backup = $null
-New-Item -ItemType Directory -Path $work | Out-Null
-try {
-    if ($AssetDirectory) {
-        Copy-Item -LiteralPath (Join-Path $AssetDirectory $archive) -Destination $work
-        Copy-Item -LiteralPath (Join-Path $AssetDirectory 'checksums.txt') -Destination $work
-    } elseif ($useGh) {
-        & gh release download "v$Version" --repo $repo --dir $work --pattern $archive --pattern checksums.txt
-        if ($LASTEXITCODE -ne 0) { throw 'Download failed.' }
+
+function Get-LatestVersion {
+    try {
+        $release = Invoke-RestMethod -Uri "$ApiUrl/repos/$GitHubRepo/releases/latest" -Headers (Get-ApiHeaders) -UseBasicParsing
+        $script:LatestVersion = $release.tag_name -replace "^v", ""
+    } catch {
+        throw "Could not determine the latest version: $($_.Exception.Message)`nCheck your internet connection, or set GITHUB_TOKEN if you are being rate limited."
+    }
+    if (-not $script:LatestVersion) { throw "Could not parse a version from the GitHub release response." }
+
+    if ($env:STCLI_VERSION) {
+        $script:Version = $env:STCLI_VERSION -replace "^v", ""
+        Write-Host "Installing requested version: v$script:Version (latest is v$script:LatestVersion)"
     } else {
-        foreach ($name in @($archive, 'checksums.txt')) {
-            Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/$repo/releases/download/v$Version/$name" -OutFile (Join-Path $work $name)
+        $script:Version = $script:LatestVersion
+        Write-Host "Latest version: v$script:Version"
+    }
+    if ($script:Version -cnotmatch '^[A-Za-z0-9][A-Za-z0-9._-]*$') { throw "Invalid release version." }
+}
+
+function Download-And-Verify {
+    $archive = "stcli_${script:Version}_windows_${script:ArchLabel}.zip"
+    $baseUrl = "$ServerUrl/$GitHubRepo/releases/download/v${script:Version}"
+
+    $script:TmpDir = Join-Path ([IO.Path]::GetTempPath()) "stcli-install-$([Guid]::NewGuid().ToString('N'))"
+    New-Item -ItemType Directory -Path $script:TmpDir | Out-Null
+    $archivePath = Join-Path $script:TmpDir $archive
+    $checksumsPath = Join-Path $script:TmpDir "checksums.txt"
+
+    Write-Host "Downloading stcli v${script:Version}..."
+    Invoke-WebRequest -Uri "$baseUrl/checksums.txt" -OutFile $checksumsPath -UseBasicParsing
+
+    Write-Host "Verifying checksum..."
+    $expected = $null
+    foreach ($line in Get-Content $checksumsPath) {
+        $parts = $line.Trim() -split "\s+", 2
+        if ($parts.Count -eq 2 -and $parts[1].Trim() -ceq $archive) {
+            if ($expected -or $parts[0] -cnotmatch '^[a-fA-F0-9]{64}$') { throw "Invalid or duplicate checksum for $archive" }
+            $expected = $parts[0].ToLowerInvariant()
         }
     }
-    $checksumLines = @(Get-Content (Join-Path $work 'checksums.txt') | Where-Object {
-        $_ -match ('^[0-9a-fA-F]{64}\s+' + [regex]::Escape($archive) + '$')
-    })
-    if ($checksumLines.Count -ne 1) { throw 'Missing or ambiguous SHA-256 checksum.' }
-    $expected = ($checksumLines[0] -split '\s+')[0]
-    $actual = (Get-FileHash (Join-Path $work $archive) -Algorithm SHA256).Hash
-    if ($actual -ne $expected) { throw 'Checksum mismatch; existing installation left untouched.' }
+    if (-not $expected) { throw "Checksum entry not found for $archive" }
+
+    Invoke-WebRequest -Uri "$baseUrl/$archive" -OutFile $archivePath -UseBasicParsing
+    $actual = (Get-FileHash -Path $archivePath -Algorithm SHA256).Hash.ToLower()
+    if ($actual -ne $expected) {
+        throw "Checksum verification failed.`n  Expected: $expected`n  Actual:   $actual`nThe downloaded file may be corrupted. Please try again."
+    }
+    Write-Host "Checksum verified."
+
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $zip = [IO.Compression.ZipFile]::OpenRead((Join-Path $work $archive))
+    $zip = [IO.Compression.ZipFile]::OpenRead($archivePath)
     try {
-        if ($zip.Entries.Count -ne 1 -or $zip.Entries[0].FullName -ne 'stcli.exe') {
-            throw 'Unexpected archive contents.'
-        }
+        if ($zip.Entries.Count -ne 1 -or $zip.Entries[0].FullName -ne "stcli.exe") { throw "Unexpected archive contents." }
     } finally { $zip.Dispose() }
-    Expand-Archive -LiteralPath (Join-Path $work $archive) -DestinationPath (Join-Path $work 'unpacked')
-    New-Item -ItemType Directory -Force -Path $InstallDirectory | Out-Null
-    $staged = Join-Path $InstallDirectory ('.stcli-' + [Guid]::NewGuid().ToString() + '.exe')
-    Copy-Item -LiteralPath (Join-Path $work 'unpacked\stcli.exe') -Destination $staged
-    $target = Join-Path $InstallDirectory 'stcli.exe'
-    if (Test-Path -LiteralPath $target) {
-        # PowerShell 5.1 marshals a null string argument as an empty path.
-        # Supply a real temporary backup path for .NET Framework's Replace.
-        $backup = Join-Path $InstallDirectory ('.stcli-backup-' + [Guid]::NewGuid().ToString() + '.exe')
-        [IO.File]::Replace($staged, $target, $backup)
-        Remove-Item -LiteralPath $backup -Force
-        $backup = $null
-    } else { [IO.File]::Move($staged, $target) }
-    $staged = $null
-    if (-not $NoPathUpdate) {
-        $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
-        $entries = @($userPath -split ';' | Where-Object { $_ })
-        if ($entries -notcontains $InstallDirectory) {
-            [Environment]::SetEnvironmentVariable('Path', (($entries + $InstallDirectory) -join ';'), 'User')
-        }
-        if (($env:Path -split ';') -notcontains $InstallDirectory) { $env:Path += ";$InstallDirectory" }
-    }
-    Write-Host "Installed stcli $Version to $target"
-    Write-Host 'Run: stcli login'
-} finally {
-    if ($staged -and (Test-Path -LiteralPath $staged)) { Remove-Item -LiteralPath $staged -Force }
-    if ($backup -and (Test-Path -LiteralPath $backup)) { Remove-Item -LiteralPath $backup -Force }
-    Remove-Item -LiteralPath $work -Recurse -Force
+    Expand-Archive -Path $archivePath -DestinationPath $script:TmpDir -Force
 }
-# Do not leave gh's unsuccessful authentication probe as the caller's exit code
-# after a successful public installation (GitHub's PowerShell runner checks it).
-exit 0
+
+function Install-Binary {
+    New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
+    $src = Join-Path $script:TmpDir "stcli.exe"
+    $dest = Join-Path $InstallDir "stcli.exe"
+    $old = "$dest.old"
+
+    if (Test-Path $old) { Remove-Item $old -Force -ErrorAction SilentlyContinue }
+
+    # Windows locks a running image against overwrite but allows a rename.
+    $movedAside = $false
+    if (Test-Path $dest) {
+        Move-Item -Path $dest -Destination $old -Force
+        $movedAside = $true
+    }
+    try {
+        Move-Item -Path $src -Destination $dest -Force
+    } catch {
+        if ($movedAside -and -not (Test-Path $dest)) { Move-Item -Path $old -Destination $dest -Force }
+        throw
+    }
+    if (Test-Path $old) { Remove-Item $old -Force -ErrorAction SilentlyContinue }
+}
+
+function Send-EnvironmentChange {
+    # Registry writes do not notify running processes; broadcast so new terminals see the PATH.
+    try {
+        if (-not ("Win32.NativeMethods" -as [type])) {
+            Add-Type -Namespace Win32 -Name NativeMethods -MemberDefinition @'
+[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);
+'@
+        }
+        $result = [UIntPtr]::Zero
+        [Win32.NativeMethods]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, "Environment", 2, 5000, [ref]$result) | Out-Null
+    } catch { }
+}
+
+function Setup-Path {
+    $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey("Environment", $true)
+    if (-not $key) { throw "Could not open HKCU\Environment to update PATH." }
+    try {
+        # Read unexpanded and write back with the existing kind, so %VAR% entries survive.
+        $current = [string]$key.GetValue("Path", "", [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
+        $entries = @($current -split ";" | Where-Object { $_ -ne "" })
+        if ($entries -contains $InstallDir) { return }
+        $kind = [Microsoft.Win32.RegistryValueKind]::ExpandString
+        try { $kind = $key.GetValueKind("Path") } catch { }
+        $newPath = if ([string]::IsNullOrEmpty($current)) { $InstallDir } else { "$InstallDir;$current" }
+        $key.SetValue("Path", $newPath, $kind)
+    } finally { $key.Dispose() }
+
+    Send-EnvironmentChange
+    $env:Path = "$InstallDir;$env:Path"
+    Write-Host "Added $InstallDir to user PATH."
+    $script:PathUpdated = $true
+}
+
+function Print-Success {
+    Write-Host ""
+    Write-Host "stcli v${script:Version} installed to $InstallDir\stcli.exe"
+    Write-Host ""
+    if ($script:Version -ne $script:LatestVersion) {
+        Write-Host "Note: You installed v${script:Version}, but the latest is v${script:LatestVersion}."
+        Write-Host "Re-run this installer without STCLI_VERSION to upgrade."
+        Write-Host ""
+    }
+    if ($script:PathUpdated) { Write-Host "Restart your terminal for PATH changes to take effect, then:" }
+    Write-Host "  stcli login    - authenticate with your Supertrace account"
+    Write-Host "  stcli --help   - see available commands"
+}
+
+$script:Version = ""
+$script:LatestVersion = ""
+$script:ArchLabel = ""
+$script:TmpDir = ""
+$script:PathUpdated = $false
+
+# Failures throw rather than exit, so `irm ... | iex` does not close the caller's session.
+try {
+    Detect-Platform
+    Get-LatestVersion
+    Download-And-Verify
+    Install-Binary
+    Setup-Path
+    Print-Success
+} finally {
+    if ($script:TmpDir -and (Test-Path $script:TmpDir)) { Remove-Item -Recurse -Force $script:TmpDir }
+}
