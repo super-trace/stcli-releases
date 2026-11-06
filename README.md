@@ -33,6 +33,11 @@ your shell profile or user environment if it is not already there. Re-run the
 command to upgrade, and check what you have with `stcli version`, which prints
 the release version and the source commit, for example `2026.11.04 (c5ddc1f)`.
 
+stcli also updates itself: on launch it checks for a newer release, installs it
+in the background, and the next launch runs it. Set `STCLI_NO_AUTO_UPDATE=1`, or
+`"auto_update": false` in `~/.config/stcli/config.json`, to turn that off;
+`stcli update` installs the latest release on demand.
+
 To choose a version or installation directory:
 
 ```sh
