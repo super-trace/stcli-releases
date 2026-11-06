@@ -6,13 +6,16 @@ release. This page covers everything else.
 ## Pin a version or directory
 
 ```sh
-STCLI_VERSION=2026.10.09 sh -c "$(curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh)"
+STCLI_VERSION=2026.11.05 sh -c "$(curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh)"
 STCLI_INSTALL_DIR="$HOME/bin" sh -c "$(curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh)"
 ```
 
 ```powershell
-$env:STCLI_VERSION = "2026.10.09"; irm https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.ps1 | iex
+$env:STCLI_VERSION = "2026.11.05"; irm https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.ps1 | iex
 ```
+
+The PowerShell pin stays set for the session; `Remove-Item Env:STCLI_VERSION`
+before running the installer again for the latest release.
 
 Versions are accepted with or without the leading `v`. Set `GITHUB_TOKEN` to
 raise the GitHub API rate limit, for example in CI.
@@ -29,7 +32,8 @@ the next launch runs it. `stcli version` names an update waiting for a restart.
 | `stcli update` | Install the latest release now, regardless of the above. |
 
 Both apply only to installs under `~/.stcli/bin`. A binary anywhere else never
-updates itself.
+updates itself. Auto-update shipped in v2026.11.06; a v2026.11.05 install
+re-runs the installer once to pick it up.
 
 ## Manual install
 
@@ -37,8 +41,8 @@ Download the archive for your platform and `checksums.txt` from the releases
 page, verify, extract, and put `stcli` on your `PATH`:
 
 ```sh
-shasum -a 256 -c --ignore-missing checksums.txt
-tar -xzf stcli_<version>_linux_amd64.tar.gz
+grep stcli_<version>_linux_amd64.tar.gz checksums.txt | shasum -a 256 -c &&
+  tar -xzf stcli_<version>_linux_amd64.tar.gz
 ```
 
 | Package | Contents |

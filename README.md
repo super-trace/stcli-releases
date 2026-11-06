@@ -29,7 +29,7 @@ changes.
 
 ## Safety
 
-- **Every write asks.** Commands are classified on your machine from rule
+- **Every write the agent proposes asks.** Commands are classified on your machine from rule
   tables built into the binary. Read-only runs; anything else waits for `y`.
   Destructive commands need a typed confirmation. There is no "always allow".
 - **The model never decides.** The agent's own opinion of a command is shown
@@ -170,7 +170,9 @@ rm "$HOME/.stcli/bin/stcli"
 Remove-Item "$env:USERPROFILE\.stcli\bin\stcli.exe"
 ```
 
-Drop the `PATH` entry the installer added. `rm -r ~/.config/stcli` removes
+If you chose a different directory with `STCLI_INSTALL_DIR`, remove `stcli`
+there instead. Drop the `PATH` entry the installer added. `rm -r
+~/.config/stcli`, or the directory `XDG_CONFIG_HOME` points at, removes
 credentials and the config file.
 
 ## Support
