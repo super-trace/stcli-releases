@@ -1,20 +1,45 @@
 # stcli
 
-stcli is a terminal UI that SSHes into network equipment and operates it in
-natural language. You describe intent, "why is BGP down on this router?", "turn
-up ge-0/0/2", a backend agent turns it into commands for the connected
-platform, and stcli runs them over your own SSH session behind a human approval
-gate. Device credentials never leave your machine.
+Operate network equipment in plain English, from your terminal, over your own
+SSH session. Ask a question, approve the commands, read the answer.
 
-This repository holds the prebuilt packages and installers for macOS, Linux,
-WSL, and Windows. No Go installation or GitHub login required.
+```
+❯ why is bgp down on this router?
 
-> **Public launch:** This repository and `super-trace/ac6-workshop-lab` will both
-> become public. These installation instructions are written for that public state;
-> anonymous downloads will work once visibility changes. At launch, update both
-> READMEs, replace the workshop's authenticated `gh api` installer download with
-> the public `curl` command below, remove private-repository access requirements,
-> and test installation without GitHub login.
+  show bgp summary                                        read-only
+  show interfaces ge-0/0/2                                read-only
+
+  Peer 10.0.0.2 has been Idle for 4h12m. Its interface,
+  ge-0/0/2, is administratively down.
+
+❯ bring it up
+
+  ┌ Approval needed ──────────────────────────────────────────┐
+  │ ❯ configure; set interfaces ge-0/0/2 enable; commit       │
+  │   re-enable ge-0/0/2 so the BGP peer can reconnect        │
+  │   state-changing · 4m58s left                             │
+  │                                                           │
+  │   y  run once      n  deny                                │
+  └───────────────────────────────────────────────────────────┘
+```
+
+A backend agent turns intent into commands for the connected platform. stcli
+runs them locally, shows every one, and stops for a human before anything
+changes.
+
+## Safety
+
+- **Every write asks.** Commands are classified on your machine from rule
+  tables built into the binary. Read-only runs; anything else waits for `y`.
+  Destructive commands need a typed confirmation. There is no "always allow".
+- **The model never decides.** The agent's own opinion of a command is shown
+  but does not reach the gate. Unknown commands are treated as writes.
+- **Credentials stay local.** SSH keys, agents and passwords never leave your
+  machine. The backend sees command output, not secrets.
+
+Platforms with their own rule tables: Junos, Cisco IOS-XE, Cisco NX-OS, Arista
+EOS, Nokia SR Linux, Ciena SAOS 10, and Linux. Anything else runs under the
+strictest table.
 
 ## Install
 
@@ -30,28 +55,14 @@ Windows, in PowerShell:
 irm https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.ps1 | iex
 ```
 
-The installer puts the latest release at `~/.stcli/bin/stcli`
-(`%USERPROFILE%\.stcli\bin\stcli.exe` on Windows), needs no administrator
-rights, and adds that directory to `PATH`. Re-run it to upgrade. `stcli version`
-prints the release version and source commit, for example `2026.11.04 (c5ddc1f)`.
+Installs to `~/.stcli/bin` (`%USERPROFILE%\.stcli\bin` on Windows) without
+administrator rights and adds it to `PATH`. Re-run to upgrade; stcli also
+updates itself in the background unless `STCLI_NO_AUTO_UPDATE=1` is set.
+`stcli version` prints what you have.
 
-stcli also updates itself: on launch it checks for a newer release, installs it
-in the background, and the next launch runs it. Set `STCLI_NO_AUTO_UPDATE=1`, or
-`"auto_update": false` in `config.json`, to turn that off; `stcli update`
-installs the latest release on demand.
-
-To choose a version or installation directory:
-
-```sh
-STCLI_VERSION=2026.10.09 sh -c "$(curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh)"
-STCLI_INSTALL_DIR="$HOME/bin" sh -c "$(curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh)"
-```
-
-```powershell
-$env:STCLI_VERSION = "2026.10.09"; irm https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.ps1 | iex
-```
-
-Set `GITHUB_TOKEN` to raise the GitHub API rate limit, for example in CI.
+Needs a real terminal, SSH reach to your devices, and HTTPS to
+`cli.supertrace.ai`. Pinning a version or directory, and offline verification,
+are in [docs/install.md](docs/install.md).
 
 ## First run
 
@@ -62,20 +73,11 @@ stcli admin@10.0.0.1  # sign in, then SSH to the device
 
 The first launch prints a sign-in URL, offers to open a browser, and polls
 until you confirm. Over SSH or on a headless machine, paste the URL into any
-browser. stcli authenticates to devices the way `ssh` would: ssh-agent,
-`~/.ssh` keys, keyboard-interactive, or a password prompt. Passwords are never
-stored.
+browser. Device authentication works the way `ssh` does: ssh-agent, `~/.ssh`
+keys, keyboard-interactive, or a password prompt. Passwords are never stored.
 
-Then type what you want:
-
-```
-why is bgp down on this router?
-show me the interfaces with errors
-turn up ge-0/0/2
-```
-
-With no device connected, name one ("connect to admin@10.0.0.1") and the agent
-asks to connect.
+Then type what you want. With no device connected, name one ("connect to
+admin@10.0.0.1") and the agent asks to connect.
 
 ## Usage
 
@@ -87,63 +89,21 @@ stcli login | logout | version | update
 | Target | Description |
 | --- | --- |
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config`. |
-| `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. Options: `?context=`, `?container=`, `?shell=`. |
+| `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. |
 
-Each target opens its own tab. With none, the TUI opens one unbound tab.
+Each target opens its own tab. `--resume` brings back a past session on the
+device it was on. Flags, environment variables, every slash command and every
+key are in [docs/reference.md](docs/reference.md); `/help` inside the TUI
+shows the same.
 
-| Command / flag | Description |
+| In the TUI | Description |
 | --- | --- |
-| `login` / `logout` | Sign in through the browser; revoke and clear the local store. |
-| `version` | Release version, git sha, and any update waiting for a restart. |
-| `update` | Install the latest release now. |
-| `--resume [ID]` | Resume a session by id or unique prefix, or pick from a list, and reconnect to its device. Takes no target. |
-| `--backend URL` | Backend base URL. Default `https://cli.supertrace.ai`. |
-| `--theme NAME` | `auto`, `dark`, `light` or `mono`. |
-| `--debug` | Error detail in the TUI, plus `stcli-debug.log` in the working directory. |
-
-| Variable | Description |
-| --- | --- |
-| `STCLI_TOKEN` | Bearer token instead of the credential store. CI and lab backends. |
-| `STCLI_DEBUG` / `STCLI_THEME` | Same as the flags. `NO_COLOR` is honoured too. |
-| `STCLI_NO_AUTO_UPDATE` | Set to anything to stop background updates. |
-| `STCLI_SSH_PASSWORD` | Answer SSH password prompts with this value. Lab use only. |
-| `STCLI_SKIP_SSH_CONFIG` | Set to anything to ignore `~/.ssh/config`. |
-
-## Inside the TUI
-
-| Command | Description |
-| --- | --- |
-| `/connect [target]`, `/c` | Redial this tab, or pick which session a new target joins. |
-| `/add <target>` | Add a device to this session. Up to 8 per session. |
-| `/new [target]`, `/n` | Start a fresh session, or open a new tab on target. |
-| `/disconnect [label]` | Close one device. |
-| `/sessions [--new] <n\|id>` | List past sessions; resume one here or in a new tab. |
-| `/switch [n\|device]`, `/s` | Pick a tab, or jump to one. |
-| `/close`, `/quit` | Close this tab; leave. |
-| `/usage`, `/help` | Token and command accounting; commands and keys. |
-
-`!show interfaces terse` runs the rest of the line verbatim on the device, with
-no agent turn. With several devices, name one: `!edge1 show bgp summary`. The
-command and its output join the transcript, so the agent sees what you did.
-
-| Key | Action |
-| --- | --- |
-| `enter` | Send. During a turn, queue the message for when it ends. |
-| `alt+enter` | Newline. |
-| `ctrl+enter` | Interrupt the running turn and send now. |
-| `esc` | Interrupt the turn; cancel a dialog. |
-| `ctrl+up` / `ctrl+down`, `ctrl+e` | Select a command block; expand or collapse it. |
-| `ctrl+left` / `ctrl+right`, `alt+1..9` | Switch tab; jump to tab. |
-| `ctrl+c` twice | Quit. |
-
-Keys reach the active tab only; background tabs keep streaming and park their
-approval prompts until you switch. When a single-tab session exits, stcli
-prints the `stcli --resume` command that brings it back.
+| `/connect <target>` | Dial a device; `/add` joins it to this session, `/new` opens a tab. |
+| `/sessions` | List past sessions and resume one. |
+| `!show bgp summary` | Run a command yourself, no agent turn. `!edge1 cmd` with several devices. |
+| `esc` | Interrupt the turn. `ctrl+c` twice quits. |
 
 ## Approvals
-
-Every command the agent proposes is classified locally, from rule tables built
-into the binary. The agent's own opinion is shown but never decides.
 
 | Class | What happens |
 | --- | --- |
@@ -152,11 +112,10 @@ into the binary. The agent's own opinion is shown but never decides.
 | unknown | Same, plus `r` to remember it as read-only in `config.json`. |
 | destructive | Type the confirmation phrase shown, then `enter`. |
 
-There is no "always allow" for writes. A `!` command skips the dialog, but a
-destructive one still asks for the phrase. An unanswered prompt times out after
-five minutes and the agent is told the command did not run. Reading, listing or
-editing a file on your machine, or running a local command, opens its own
-dialog.
+An unanswered prompt times out after five minutes and the agent is told the
+command did not run. A `!` command skips the dialog, but a destructive one
+still asks for the phrase. Reading, listing or editing a file on your machine,
+or running a local command, opens its own dialog.
 
 ## Configuration
 
@@ -169,7 +128,7 @@ subset. Both are in [docs/configuration.md](docs/configuration.md).
 
 - **Several devices, one conversation.** `stcli core1 core2` opens two tabs;
   `/add edge1` joins a device to the current session so the agent can compare
-  across them.
+  across them. Up to 8 per session.
 - **Say where it goes.** "connect to edge2 in a new tab" turns the destination
   dialog into a one-key confirm.
 - **Keep typing.** Messages sent during a turn queue up; `ctrl+enter` jumps the
@@ -180,23 +139,26 @@ subset. Both are in [docs/configuration.md](docs/configuration.md).
   accumulates an `allow` list tuned to your gear.
 - **Deny the dangerous.** A `deny` rule refuses a command from the agent and
   from `!` alike, with no dialog.
-- **Pods too.** `stcli k8s://prod/router-0?container=frr` opens a shell
-  through the Kubernetes API.
 
 ## Releases and verification
 
-A release builds five packages, macOS universal, Linux amd64/arm64, and
-Windows amd64/arm64, with the version stamped into every executable. Verified
-archives, `checksums.txt`, and `provenance.json` are uploaded to a draft
-release here and published once every upload succeeds.
+Releases are tagged by UTC date, `vYYYY.MM.DD`, with `.2`, `.3` for further
+releases that day. Each ships five archives, `checksums.txt` and
+`provenance.json`, which records the source commit and toolchain. The releases
+page is the changelog.
 
-Versions use the UTC date: `vYYYY.MM.DD`, with `.2`, `.3`, etc. for additional
-releases that day. Installers accept the version without `v`.
+| Platform | Package | Signing |
+| --- | --- | --- |
+| macOS | universal, Intel and Apple Silicon | ad-hoc signed, not notarized |
+| Linux, WSL | amd64, arm64 | unsigned |
+| Windows | amd64, arm64 | unsigned; SmartScreen may warn on first run |
 
-The installer checks the archive's SHA-256 before replacing an installation.
-Checksums detect corrupt downloads; they are not independent publisher
-signatures. macOS executables are ad-hoc signed, not notarized; Windows
-executables are unsigned, so SmartScreen may warn on first run.
+The installer verifies the SHA-256 before replacing anything. Checksums catch
+corrupt downloads; they are not a publisher signature. To verify by hand:
+
+```sh
+shasum -a 256 -c --ignore-missing checksums.txt
+```
 
 ## Uninstall
 
@@ -208,6 +170,11 @@ rm "$HOME/.stcli/bin/stcli"
 Remove-Item "$env:USERPROFILE\.stcli\bin\stcli.exe"
 ```
 
-If you selected a different installation directory, remove `stcli` there instead,
-and drop the `PATH` entry the installer added. `rm -r ~/.config/stcli` drops the
-credentials and config file.
+Drop the `PATH` entry the installer added. `rm -r ~/.config/stcli` removes
+credentials and the config file.
+
+## Support
+
+Problems with installation, packages, or the tool itself: open an issue in
+this repository. Run with `--debug` and attach `stcli-debug.log` from the
+working directory.
