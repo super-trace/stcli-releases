@@ -185,12 +185,10 @@ subset. Both are in [docs/configuration.md](docs/configuration.md).
 
 ## Releases and verification
 
-A maintainer cuts a release from the Release workflow in
-[stcli](https://github.com/super-trace/stcli). It builds five packages, macOS
-universal, Linux amd64/arm64, and Windows amd64/arm64, with the version stamped
-into every executable. Verified archives, `checksums.txt`, and `provenance.json`
-are uploaded to a draft release here, published once every upload succeeds, and
-the built commit is tagged in stcli with the same version.
+A release builds five packages, macOS universal, Linux amd64/arm64, and
+Windows amd64/arm64, with the version stamped into every executable. Verified
+archives, `checksums.txt`, and `provenance.json` are uploaded to a draft
+release here and published once every upload succeeds.
 
 Versions use the UTC date: `vYYYY.MM.DD`, with `.2`, `.3`, etc. for additional
 releases that day. Installers accept the version without `v`.
