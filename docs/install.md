@@ -17,6 +17,9 @@ $env:STCLI_VERSION = "2026.11.05"; irm https://raw.githubusercontent.com/super-t
 The PowerShell pin stays set for the session; `Remove-Item Env:STCLI_VERSION`
 before running the installer again for the latest release.
 
+The pin applies to that installation only: auto-update replaces it on a later
+launch unless turned off, see below.
+
 Versions are accepted with or without the leading `v`. Set `GITHUB_TOKEN` to
 raise the GitHub API rate limit, for example in CI.
 
@@ -41,8 +44,15 @@ Download the archive for your platform and `checksums.txt` from the releases
 page, verify, extract, and put `stcli` on your `PATH`:
 
 ```sh
-grep stcli_<version>_linux_amd64.tar.gz checksums.txt | shasum -a 256 -c &&
-  tar -xzf stcli_<version>_linux_amd64.tar.gz
+grep stcli_2026.11.06_linux_amd64.tar.gz checksums.txt | shasum -a 256 -c &&
+  tar -xzf stcli_2026.11.06_linux_amd64.tar.gz
+```
+
+```powershell
+$expected = (Select-String stcli_2026.11.06_windows_amd64.zip checksums.txt).Line.Split(" ")[0]
+if ((Get-FileHash stcli_2026.11.06_windows_amd64.zip).Hash -ieq $expected) {
+  Expand-Archive stcli_2026.11.06_windows_amd64.zip -DestinationPath "$env:USERPROFILE\.stcli\bin"
+}
 ```
 
 | Package | Contents |

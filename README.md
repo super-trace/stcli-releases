@@ -172,7 +172,7 @@ Remove-Item "$env:USERPROFILE\.stcli\bin\stcli.exe"
 
 If you chose a different directory with `STCLI_INSTALL_DIR`, remove `stcli`
 there instead. Drop the `PATH` entry the installer added. `rm -r
-~/.config/stcli`, or the directory `XDG_CONFIG_HOME` points at, removes
+~/.config/stcli` (`$XDG_CONFIG_HOME/stcli` when that variable is set) removes
 credentials and the config file.
 
 ## Support
