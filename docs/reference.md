@@ -14,7 +14,9 @@ stcli login | logout | version | update
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config` or a bracketed IPv6 literal. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. Options: `?context=`, `?container=`, `?shell=`. |
 
-Each target opens its own tab. With none, the TUI opens one unbound tab.
+Each target opens its own tab. With none, the TUI opens one unbound tab. A new tab's
+session is created when its first device connects or its first message is sent, so a
+tab closed untouched leaves no session behind.
 
 | Command / flag | Description |
 | --- | --- |
