@@ -69,6 +69,13 @@ brew install super-trace/tap/stcli
 `brew upgrade stcli` picks up new releases; a Homebrew install does not update
 itself.
 
+Before opening, stcli checks the backend's protocol version. When the backend
+has moved to a newer major version, stcli installs the matching release first
+and asks you to run the command again. If it cannot update itself (installed
+with Homebrew, or auto-update is off through `STCLI_NO_AUTO_UPDATE` or
+`auto_update: false`), it says how to update and exits. Minor differences never
+need an update.
+
 Needs a real terminal, SSH reach to your devices, and HTTPS to
 `cli.supertrace.ai`. Pinning a version or directory, and offline verification,
 are in [docs/install.md](docs/install.md).
@@ -129,9 +136,9 @@ or running a local command, opens its own dialog.
 ## Configuration
 
 `~/.config/stcli/config.json` holds per-host SSH opt-ins, your own
-allow/ask/deny command rules, key bindings, theme and accessibility settings,
-and the auto-update switch. `~/.ssh/config` is honoured for a documented
-subset. Both are in [docs/configuration.md](docs/configuration.md).
+allow/ask/deny command rules, MCP servers, key bindings, theme and
+accessibility settings, and the auto-update switch. `~/.ssh/config` is honoured
+for a documented subset. Both are in [docs/configuration.md](docs/configuration.md).
 
 ## Tricks
 

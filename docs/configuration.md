@@ -15,6 +15,12 @@ value fails startup and names the entry.
     "ask":   ["dmesg"],
     "deny":  ["show running-config | include password"]
   },
+  "mcp": {
+    "netbox": {
+      "url": "https://netbox.example.com/mcp",
+      "headers": {"Authorization": "Token …"}
+    }
+  },
   "keys": {
     "prev_tab": ["ctrl+h"],
     "next_tab": ["ctrl+l"],
@@ -64,6 +70,13 @@ chains, pipe targets, and the payloads of `find -exec` and `env`.
 Pressing `r` in the approval dialog prefills the command up to its first pipe
 or redirect, lets you shorten it to no fewer than two words, and saves it to
 `allow` before running the command.
+
+## `mcp`
+
+MCP servers, keyed by name. `url` is required and must be `http` or `https`;
+`headers` is optional. stcli writes the file readable only by you (mode 0600),
+since headers often carry credentials. `/mcp add` and `/mcp remove` edit this
+block for you; see [reference.md](reference.md#mcp-servers).
 
 ## `keys`
 
