@@ -196,7 +196,7 @@ print_success() {
   if [ "$NEEDS_SOURCE" = "true" ]; then
     print_banner "Run 'source $PROFILE' or open a new terminal, then:"
   fi
-  echo "  stcli login    — authenticate with your Supertrace account"
+  echo "  stcli          — authenticate with your Google or GitHub SSO"
   echo "  stcli --help   — see available commands"
 }
 
