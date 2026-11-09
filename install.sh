@@ -182,12 +182,19 @@ setup_path() {
   NEEDS_SOURCE=true
 }
 
+print_banner() {
+  border=$(printf "%$((${#1} + 4))s" '' | tr ' ' '#')
+  echo "$border"
+  echo "# $1 #"
+  echo "$border"
+}
+
 print_success() {
   echo ""
   echo "stcli v${VERSION} installed to $INSTALL_DIR/stcli"
   echo ""
   if [ "$NEEDS_SOURCE" = "true" ]; then
-    echo "Run 'source $PROFILE' or open a new terminal, then:"
+    print_banner "Run 'source $PROFILE' or open a new terminal, then:"
   fi
   echo "  stcli login    — authenticate with your Supertrace account"
   echo "  stcli --help   — see available commands"
