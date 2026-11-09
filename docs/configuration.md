@@ -75,8 +75,11 @@ or redirect, lets you shorten it to no fewer than two words, and saves it to
 
 MCP servers, keyed by name. `url` is required and must be `http` or `https`;
 `headers` is optional. stcli writes the file readable only by you (mode 0600),
-since headers often carry credentials. `/mcp add` and `/mcp remove` edit this
-block for you; see [reference.md](reference.md#mcp-servers).
+since headers often carry credentials. If you create or edit the file by hand,
+restrict it yourself before adding a header: `chmod 600 ~/.config/stcli/config.json`
+on macOS and Linux, or remove other users from the file's permissions in its
+Properties dialog on Windows. `/mcp add` and `/mcp remove` edit this block for
+you; see [reference.md](reference.md#mcp-servers).
 
 ## `keys`
 
