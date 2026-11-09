@@ -150,7 +150,7 @@ function Print-Success {
         Write-Host ""
     }
     if ($script:PathUpdated) { Write-Host "Restart your terminal for PATH changes to take effect, then:" }
-    Write-Host "  stcli login    - authenticate with your Supertrace account"
+    Write-Host "  stcli          - authenticate with your Google or GitHub SSO"
     Write-Host "  stcli --help   - see available commands"
 }
 
