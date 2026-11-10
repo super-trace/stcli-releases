@@ -12,6 +12,7 @@ stcli login | logout | version | update
 | Target | Description |
 | --- | --- |
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config` or a bracketed IPv6 literal. |
+| `ssh://user@host[:port]?jump=HOSTS` | SSH through jump hosts, comma-separated `[user@]host[:port]`. This is what `-J` writes, and the session keeps it, so a resume goes through the same jump hosts. `jump=none` is refused. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. Options: `?context=`, `?container=`, `?shell=`. |
 
 Each target opens its own tab. With none, the TUI opens one unbound tab. A new tab's
@@ -26,6 +27,7 @@ tab closed untouched leaves no session behind.
 | `--resume [ID]` | Resume a session by id or unique prefix, or pick from a list, and reconnect to its device. Takes no target. |
 | `--backend URL` | Backend base URL. Default `https://cli.supertrace.ai`. |
 | `--theme NAME` | `auto`, `dark`, `light` or `mono`. |
+| `-J HOSTS` | Reach each SSH target through these jump hosts, as `ssh -J`. Each host is looked up in `~/.ssh/config`, and the list replaces the target's own `ProxyJump`. Not with `--resume` or a pod target. |
 | `--debug` | Error detail in the TUI, plus `stcli-debug.log` in the working directory. |
 
 ## Environment
@@ -46,6 +48,7 @@ tab closed untouched leaves no session behind.
 | `/connect [target]` | `/c` | Redial this tab, or pick which session a new target joins. |
 | `/add <target>` | | Add a device to this session, no dialog. Up to 8 per session. |
 | `/new [target]` | `/n` | Start a fresh session, or open a new tab on target. |
+| `-J HOSTS <target>` | | After `/connect`, `/add` or `/new`: go through jump hosts, as the `-J` flag. |
 | `/disconnect [label]` | | Close one device. |
 | `/sessions [--new] <n\|id>` | | List past sessions; resume one here or in a new tab. |
 | `/switch [n\|device]` | `/s` | Pick a tab, or jump to one. |

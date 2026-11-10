@@ -89,6 +89,7 @@ stcli login | logout | version | update
 | Target | Description |
 | --- | --- |
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config`. |
+| `ssh://user@host?jump=bastion` | SSH through a jump host. `stcli -J bastion user@host` writes it. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. |
 
 Each target opens its own tab. `--resume` brings back a past session on the
