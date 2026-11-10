@@ -51,6 +51,7 @@ tab closed untouched leaves no session behind.
 | `/switch [n\|device]` | `/s` | Pick a tab, or jump to one. |
 | `/close` | | Close this tab; on the last tab, quit. |
 | `/usage` | | Account token and command accounting. |
+| `/copy` | | Copy the agent's last reply as markdown. |
 | `/help` | `/h`, `/?` | Commands and keys. |
 | `/quit` | `/q`, `/exit` | Leave. |
 
@@ -73,11 +74,19 @@ Defaults; every name is rebindable in `config.json`, see
 | `up` / `down` | Input history, from the input's first or last line. `up` on an empty input pulls back the last queued message. |
 | `ctrl+up` / `ctrl+down` | Select the previous / next command block. |
 | `ctrl+e` | Expand or collapse the selected block. |
+| `ctrl+y` | Copy the selected block, or the most recent one: the command and its full output. |
+| `ctrl+o` | Turn mouse reporting off or on, so the terminal can select text itself. |
 | `pgup` / `pgdown` | Scroll. |
 | `ctrl+left` / `ctrl+right` | Previous / next tab. |
 | `alt+1` … `alt+9` | Jump to tab. |
 | `ctrl+c` twice | Quit. |
 | `ctrl+d` twice | Close this tab, or quit on the last one. |
+
+Dragging over the transcript selects text and copies it on release; a double
+click takes a word and a triple click a row. Over SSH the copy relies on your
+terminal accepting OSC 52. Inside tmux that needs `set-clipboard on`, which lets
+any program in tmux set your clipboard. Where it is not accepted, press `ctrl+o`
+and select with the terminal or with tmux.
 
 Keys reach the active tab only; background tabs keep streaming and park their
 approval prompts until you switch. The tab strip marks `!` for a waiting
