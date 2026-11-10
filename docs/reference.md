@@ -98,6 +98,7 @@ Defaults; every name is rebindable in `config.json`, see
 | `alt+enter`, `ctrl+j` | Newline. |
 | `ctrl+enter` | Interrupt the running turn and send now. Needs a terminal that reports modified keys (kitty, Ghostty, WezTerm, iTerm2); elsewhere it acts like `enter`. |
 | `esc` | Interrupt the turn; cancel a dialog. |
+| `tab` | In a configuration-block dialog, switch between the Config and Diff tabs; `up` / `down` and `pgup` / `pgdown` scroll it. |
 | `up` / `down` | Input history, from the input's first or last line. `up` on an empty input pulls back the last queued message. |
 | `ctrl+up` / `ctrl+down` | Select the previous / next command block. |
 | `ctrl+e` | Expand or collapse the selected block. |
