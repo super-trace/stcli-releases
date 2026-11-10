@@ -50,6 +50,7 @@ tab closed untouched leaves no session behind.
 | `/sessions [--new] <n\|id>` | | List past sessions; resume one here or in a new tab. |
 | `/switch [n\|device]` | `/s` | Pick a tab, or jump to one. |
 | `/close` | | Close this tab; on the last tab, quit. |
+| `/mcp [list\|add\|remove]` | | Manage MCP servers. See [MCP servers](#mcp-servers). |
 | `/usage` | | Account token and command accounting. |
 | `/copy` | | Copy the agent's last reply as markdown. |
 | `/help` | `/h`, `/?` | Commands and keys. |
@@ -59,6 +60,32 @@ tab closed untouched leaves no session behind.
 With several devices in the session, name one: `!<label> cmd`. The command and
 its output join the transcript. A `!` typed while the agent's own command is
 running is refused; `esc` the turn first.
+
+## MCP servers
+
+Connect your own MCP servers and the agent can call their tools.
+
+| Command | Description |
+| --- | --- |
+| `/mcp` | Print the three forms. |
+| `/mcp list` | Each server with its URL, status and tool count. Status is `connected (N tools)`, `needs auth` or `failed: <reason>`. |
+| `/mcp add <name> <url> [--header <Key>[: <value>]]…` | Save the server to `config.json` and connect. |
+| `/mcp remove <name>` | Disconnect and forget the server. |
+
+A header named without a value is asked for with a masked prompt, so the value
+never appears on screen or in history. A value given inline works too.
+
+Names are lowercase letters, digits and hyphens, up to 32 characters. Servers
+must be reachable over HTTP(S) (the MCP streamable HTTP transport). OAuth
+sign-in and stdio servers are not supported yet.
+
+Each tool reaches the agent as `mcp__<server>__<tool>`. Every call opens an
+approval dialog with the server, the tool, its description and the arguments;
+nothing runs until you press `y` or `enter`. At most 100 tools in total are
+advertised to the agent.
+
+Changes take effect in idle tabs at once, and in a busy tab when its current
+turn ends.
 
 ## Keys
 
