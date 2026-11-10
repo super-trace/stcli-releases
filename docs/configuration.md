@@ -22,8 +22,8 @@ value fails startup and names the entry.
     }
   },
   "keys": {
-    "prev_tab": ["ctrl+h"],
-    "next_tab": ["ctrl+l"],
+    "prev_tab": ["ctrl+pgup"],
+    "next_tab": ["ctrl+pgdown"],
     "jump_tab": ["ctrl+1", "ctrl+2", "ctrl+3"]
   },
   "ui": {
