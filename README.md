@@ -126,6 +126,14 @@ command did not run. A `!` command skips the dialog, but a destructive one
 still asks for the phrase. Reading, listing or editing a file on your machine,
 or running a local command, opens its own dialog.
 
+A configuration change of more than one line arrives as one block, not one
+command at a time. stcli stages it in the device's own configuration session,
+then opens a dialog with the block on a Config tab and the device's diff on a
+Diff tab: `tab` switches, `y` commits, `n` aborts the session so nothing lands.
+A block holds configuration statements only; a line that would commit, save or
+run a command on its own is refused before anything is sent. On Arista EOS,
+Junos and Nokia SR Linux; other platforms keep the one-command dialog.
+
 ## Configuration
 
 `~/.config/stcli/config.json` holds per-host SSH opt-ins, your own
