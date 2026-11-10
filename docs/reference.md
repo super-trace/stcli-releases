@@ -105,6 +105,7 @@ Defaults; every name is rebindable in `config.json`, see
 | `ctrl+y` | Copy the selected block, or the most recent one: the command and its full output. |
 | `ctrl+o` | Turn mouse reporting off or on, so the terminal can select text itself. |
 | `pgup` / `pgdown` | Scroll. |
+| `ctrl+l` / `ctrl+end` | Jump to the latest output. While you are scrolled back, the line above the input says so, and with the mouse on, clicking it jumps too. Sending a message also jumps. |
 | `ctrl+left` / `ctrl+right` | Previous / next tab. |
 | `alt+1` … `alt+9` | Jump to tab. |
 | `ctrl+c` twice | Quit. |

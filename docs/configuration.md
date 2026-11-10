@@ -22,8 +22,8 @@ value fails startup and names the entry.
     }
   },
   "keys": {
-    "prev_tab": ["ctrl+h"],
-    "next_tab": ["ctrl+l"],
+    "prev_tab": ["ctrl+pgup"],
+    "next_tab": ["ctrl+pgdown"],
     "jump_tab": ["ctrl+1", "ctrl+2", "ctrl+3"]
   },
   "ui": {
@@ -100,6 +100,7 @@ configurable.
 | `copy` | `ctrl+y` |
 | `toggle_mouse` | `ctrl+o` |
 | `page_up` / `page_down` | `pgup` / `pgdown` |
+| `scroll_bottom` | `ctrl+l`, `ctrl+end` |
 | `history_prev` / `history_next` | `up` / `down` |
 | `quit` / `quit_eof` | `ctrl+c` / `ctrl+d` |
 | `prev_tab` / `next_tab` | `ctrl+left` / `ctrl+right` |
