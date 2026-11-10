@@ -33,7 +33,8 @@ tab closed untouched leaves no session behind.
 | Variable | Description |
 | --- | --- |
 | `STCLI_TOKEN` | Bearer token instead of the credential store. CI and lab backends. |
-| `STCLI_DEBUG` / `STCLI_THEME` | Same as the flags. `NO_COLOR` and `GLAMOUR_STYLE` are honoured too. |
+| `STCLI_DEBUG` / `STCLI_THEME` | Same as the flags. `GLAMOUR_STYLE` is honoured too. |
+| `NO_COLOR` | Set to anything to make the `auto` theme `mono`. An explicit theme still wins. |
 | `STCLI_NO_AUTO_UPDATE` | Set to anything to stop background updates. |
 | `STCLI_SSH_PASSWORD` | Answer SSH password prompts with this value. Lab use only; passphrases still prompt. |
 | `STCLI_SKIP_SSH_CONFIG` | Set to anything to ignore `~/.ssh/config`. |

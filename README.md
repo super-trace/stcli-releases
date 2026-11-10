@@ -167,14 +167,14 @@ for a documented subset. Both are in [docs/configuration.md](docs/configuration.
 ## Releases and verification
 
 Releases are tagged by UTC date, `vYYYY.MM.DD`, with `.2`, `.3` for further
-releases that day. Each ships five archives, `checksums.txt` and
+releases that day. Each ships six archives, `checksums.txt` and
 `provenance.json`, which records the source commit and toolchain. The releases
 page is the changelog.
 
 | Platform | Package | Signing |
 | --- | --- | --- |
 | macOS | universal, Intel and Apple Silicon | ad-hoc signed, not notarized |
-| Linux, WSL | amd64, arm64 | unsigned |
+| Linux, WSL | amd64, arm64, armv7 (32-bit: Raspberry Pi 2 or later) | unsigned |
 | Windows | amd64, arm64 | unsigned; SmartScreen may warn on first run |
 
 The installer verifies the SHA-256 before replacing anything. Checksums catch
