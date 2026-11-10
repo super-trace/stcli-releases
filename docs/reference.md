@@ -84,9 +84,12 @@ Defaults; every name is rebindable in `config.json`, see
 
 Dragging over the transcript selects text and copies it on release; a double
 click takes a word and a triple click a row. Over SSH the copy relies on your
-terminal accepting OSC 52. Inside tmux that needs `set-clipboard on`, which lets
-any program in tmux set your clipboard. Where it is not accepted, press `ctrl+o`
-and select with the terminal or with tmux.
+terminal accepting OSC 52. Under tmux, stcli hands the text to tmux, which keeps
+it as a paste buffer and passes it on to your terminal with its default
+settings. Any other tmux between stcli and your terminal, such as one on your
+own machine with stcli over SSH inside it, needs `set-clipboard on`, which lets
+any program in tmux set your clipboard. Where the copy is not
+accepted, press `ctrl+o` and select with the terminal or with tmux.
 
 Keys reach the active tab only; background tabs keep streaming and park their
 approval prompts until you switch. The tab strip marks `!` for a waiting
