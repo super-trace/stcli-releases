@@ -26,7 +26,8 @@ value fails startup and names the entry.
     "high_contrast": false,
     "reduced_motion": false,
     "ascii": false,
-    "screen_reader": false
+    "screen_reader": false,
+    "mouse": true
   }
 }
 ```
@@ -80,6 +81,8 @@ configurable.
 | `interrupt` | `esc` |
 | `prev_block` / `next_block` | `ctrl+up` / `ctrl+down` |
 | `toggle_block` | `ctrl+e` |
+| `copy` | `ctrl+y` |
+| `toggle_mouse` | `ctrl+o` |
 | `page_up` / `page_down` | `pgup` / `pgdown` |
 | `history_prev` / `history_next` | `up` / `down` |
 | `quit` / `quit_eof` | `ctrl+c` / `ctrl+d` |
@@ -95,6 +98,7 @@ configurable.
 | `high_contrast` | Lifts dim text to readable levels, thickens borders, underlines the active tab. |
 | `reduced_motion` | Replaces the thinking spinner with a static mark. |
 | `ascii` | Replaces box drawing, half-block caps and the spinner with ASCII; markdown renders in the `ascii` style. |
+| `mouse` | `false` starts with mouse reporting off, so the terminal selects text and the wheel does not scroll the transcript. Default `true`; `ctrl+o` switches it while running. |
 | `screen_reader` | Drops borders, bubbles and input chrome for text labels (`you:`, `assistant:`, `error:`). Implies `ascii` and `reduced_motion`. |
 
 Command badges and block states are always spelled out in words, so no meaning
