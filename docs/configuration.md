@@ -100,6 +100,7 @@ configurable.
 | `copy` | `ctrl+y` |
 | `toggle_mouse` | `ctrl+o` |
 | `page_up` / `page_down` | `pgup` / `pgdown` |
+| `scroll_bottom` | `ctrl+l`, `ctrl+end` |
 | `history_prev` / `history_next` | `up` / `down` |
 | `quit` / `quit_eof` | `ctrl+c` / `ctrl+d` |
 | `prev_tab` / `next_tab` | `ctrl+left` / `ctrl+right` |
