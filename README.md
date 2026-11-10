@@ -60,6 +60,15 @@ administrator rights and adds it to `PATH`. Re-run to upgrade; stcli also
 updates itself in the background unless `STCLI_NO_AUTO_UPDATE=1` is set.
 `stcli version` prints what you have.
 
+Or with Homebrew, on macOS or Linux:
+
+```sh
+brew install super-trace/tap/stcli
+```
+
+`brew upgrade stcli` picks up new releases; a Homebrew install does not update
+itself.
+
 Needs a real terminal, SSH reach to your devices, and HTTPS to
 `cli.supertrace.ai`. Pinning a version or directory, and offline verification,
 are in [docs/install.md](docs/install.md).
@@ -171,7 +180,8 @@ Remove-Item "$env:USERPROFILE\.stcli\bin\stcli.exe"
 ```
 
 If you chose a different directory with `STCLI_INSTALL_DIR`, remove `stcli`
-there instead. Drop the `PATH` entry the installer added. `rm -r
+there instead. Drop the `PATH` entry the installer added. A Homebrew install
+goes with `brew uninstall stcli`. `rm -r
 ~/.config/stcli` (`$XDG_CONFIG_HOME/stcli` when that variable is set) removes
 credentials and the config file.
 

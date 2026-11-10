@@ -35,7 +35,7 @@ the next launch runs it. `stcli version` names an update waiting for a restart.
 | `stcli update` | Install the latest release now, regardless of the above. |
 
 Both apply only to installs under `~/.stcli/bin`. A binary anywhere else never
-updates itself. Auto-update shipped in v2026.11.06; a v2026.11.05 install
+updates itself; a Homebrew install upgrades with `brew upgrade stcli`. Auto-update shipped in v2026.11.06; a v2026.11.05 install
 re-runs the installer once to pick it up.
 
 ## Manual install
