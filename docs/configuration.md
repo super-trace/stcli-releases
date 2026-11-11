@@ -41,8 +41,9 @@ Keyed by the host as you type it or by the address dialled, case-insensitive.
 `legacy_algorithms: true` enables obsolete SSH crypto (`ssh-rsa`, SHA-1 key
 exchange, CBC ciphers) for that host only. An `~/.ssh/config` line that adds an
 obsolete algorithm to the host's block does the same (see **Old gear** below).
-stcli never retries with weaker crypto after a failed handshake, and the TUI
-warns once per connection, naming the hosts, when this is on.
+stcli never retries with weaker crypto after a failed handshake. The TUI warns
+once per connection, naming the obsolete algorithms the device actually
+negotiated; a host that opted in but negotiates strong crypto gets no warning.
 
 ## `commands`
 
@@ -133,9 +134,15 @@ for that host only, the same as `legacy_algorithms`. stcli still offers strong
 algorithms first. A `-` list is refused, and so is a name stcli cannot speak,
 naming it.
 
+When a device needs the opt-in and the host doesn't have it, the connection
+fails with a short error: what the device offered, one line saying how to fix
+it, and a `Host` block you can paste into `~/.ssh/config` as is. `--debug` adds
+the underlying SSH error.
+
 Without that opt-in, an RSA login key signs with SHA-2 only. A device that
-accepts only `ssh-rsa` signatures (most older Cisco IOS) fails with an error
-that says which opt-in to set.
+accepts only `ssh-rsa` signatures (most older Cisco IOS) fails the same way,
+with `PubkeyAcceptedAlgorithms +ssh-rsa` in the block, and no login attempt is
+spent on it.
 
 Some things no setting reaches: DSA keys (`ssh-dss`) as host or login keys,
 RC4 and MD5, `aes192-cbc` and `aes256-cbc`, RSA keys under 1024 bits, and SSH
