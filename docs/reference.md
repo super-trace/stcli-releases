@@ -53,6 +53,7 @@ tab closed untouched leaves no session behind.
 | `/mcp [list\|add\|remove]` | | Manage MCP servers. See [MCP servers](#mcp-servers). |
 | `/usage` | | Account token and command accounting. |
 | `/copy` | | Copy the agent's last reply as markdown. |
+| `/config [key=value]` | | Open the settings dialog, or change one setting. See [Settings](#settings). |
 | `/help` | `/h`, `/?` | Commands and keys. |
 | `/quit` | `/q`, `/exit` | Leave. |
 
@@ -60,6 +61,41 @@ tab closed untouched leaves no session behind.
 With several devices in the session, name one: `!<label> cmd`. The command and
 its output join the transcript. A `!` typed while the agent's own command is
 running is refused; `esc` the turn first.
+
+## Settings
+
+`/config` opens a dialog of the settings that take one of a few values. `up` /
+`down` move, `space` or `enter` steps the highlighted setting to its next value
+and saves it at once, and `esc` closes the dialog and says what changed.
+
+`/config key=value` changes one setting without the dialog, for example
+`/config ui.copy_on_select=off`. The `ui.` prefix may be left off, and `true` /
+`false` stand for `on` / `off`.
+
+| Setting | Values | Takes effect |
+| --- | --- | --- |
+| `ui.mouse` | `on`, `off` | At once, in every tab |
+| `ui.copy_on_select` | `on`, `off` | At once, in every tab |
+| `ui.theme` | `auto`, `dark`, `light`, `mono` | When stcli restarts |
+| `ui.high_contrast`, `ui.reduced_motion`, `ui.ascii`, `ui.screen_reader` | `off`, `on` | When stcli restarts |
+| `auto_update` | `on`, `off` | When stcli restarts |
+
+Changes are saved to `config.json`, next to whatever else it holds. Key
+bindings, colours, hosts, command rules and MCP servers are not in `/config`;
+edit them in the file as [configuration.md](configuration.md) describes. A
+change you make to the file by hand takes effect when stcli restarts.
+
+### Asking the agent
+
+You can also ask the agent, for example "how do I stop a selection from
+copying?" or "turn copy on select off". It has two tools for this:
+
+- **Help** describes the stcli you are running: its commands, its keys as you
+  have bound them, and the settings above with their values. It runs without
+  asking you and reads nothing else from your settings file.
+- **Set a setting** changes one of the settings above. It opens the usual
+  approval dialog every time, and it cannot change anything `/config` does not
+  list.
 
 ## MCP servers
 
@@ -75,13 +111,14 @@ Connect your own MCP servers and the agent can call their tools.
 A header named without a value is asked for with a masked prompt, so the value
 never appears on screen or in history. A value given inline works too.
 
-Names are lowercase letters, digits and hyphens, up to 32 characters. Servers
+Names are lowercase letters, digits and hyphens, up to 32 characters; `stcli`
+is taken by stcli's own tools. Servers
 must be reachable over HTTP(S) (the MCP streamable HTTP transport). OAuth
 sign-in and stdio servers are not supported yet.
 
 Each tool reaches the agent as `mcp__<server>__<tool>`. Every call opens an
 approval dialog with the server, the tool, its description and the arguments;
-nothing runs until you press `y` or `enter`. At most 100 tools in total are
+nothing runs until you press `y` or `enter`. At most 92 tools in total are
 advertised to the agent.
 
 Changes take effect in idle tabs at once, and in a busy tab when its current

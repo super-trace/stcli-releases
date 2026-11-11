@@ -4,6 +4,9 @@
 Windows). Every block is optional. A malformed file, an unknown key, or a bad
 value fails startup and names the entry.
 
+The on/off settings and the theme can also be changed from inside stcli with
+`/config`; see [reference.md](reference.md#settings).
+
 ```json
 {
   "auto_update": true,
