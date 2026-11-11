@@ -137,8 +137,6 @@ install_binary() {
   mv -f "$STAGED" "$INSTALL_DIR/stcli"
   STAGED=""
 
-  # Never invoke `brew` itself: on Linux (e.g. Codespaces) a cold brew run can
-  # take minutes. Checking the well-known prefixes is enough for this hint.
   for BREW_PREFIX in "${HOMEBREW_PREFIX:-}" /opt/homebrew /usr/local /home/linuxbrew/.linuxbrew; do
     [ -n "$BREW_PREFIX" ] || continue
     if [ -d "$BREW_PREFIX/Cellar/stcli" ]; then
