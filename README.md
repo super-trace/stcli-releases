@@ -34,6 +34,9 @@ changes.
   Destructive commands need a typed confirmation. There is no "always allow".
 - **The model never decides.** The agent's own opinion of a command is shown
   but does not reach the gate. Unknown commands are treated as writes.
+- **Read-only mode.** `stcli --read-only` refuses every command known to change
+  a device or your machine and hides the write tools from the agent. See
+  [docs/configuration.md](docs/configuration.md#read_only).
 - **Credentials stay local.** SSH keys, agents and passwords never leave your
   machine. The backend sees command output, not secrets.
 

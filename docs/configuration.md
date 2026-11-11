@@ -15,6 +15,7 @@ value fails startup and names the entry.
     "ask":   ["dmesg"],
     "deny":  ["show running-config | include password"]
   },
+  "read_only": false,
   "mcp": {
     "netbox": {
       "url": "https://netbox.example.com/mcp",
@@ -71,6 +72,26 @@ chains, pipe targets, and the payloads of `find -exec` and `env`.
 Pressing `r` in the approval dialog prefills the command up to its first pipe
 or redirect, lets you shorten it to no fewer than two words, and saves it to
 `allow` before running the command.
+
+## `read_only`
+
+`true` fixes the run read-only, the same as `--read-only`; either turns it on.
+The status bar shows `READ-ONLY`. There is no way to leave the mode from inside
+the session.
+
+| Call | Read-only mode |
+| --- | --- |
+| Read-only command | Runs. |
+| State-changing or destructive command | Refused with `refused: this session is read-only`, no dialog. |
+| Unknown command | Approval dialog. |
+| Command matching an `ask` entry | Approval dialog, unless a built-in write is chained, redirected or piped onto it. |
+| `!` command | Same rules; an unknown one opens the approval dialog, with no remember or ask-the-agent option. |
+| `run_local_command` | Same rules, then its dialog as usual. |
+| `apply_config`, `edit_file`, `netbox_apply` | Not offered to the agent; refused if called. |
+| `read_file`, `list_files`, `connect`, `netbox_read`, MCP tools | Unchanged. |
+
+`deny` still wins and keeps its own message. An `allow` entry that lifts a bare
+write verb still runs.
 
 ## `mcp`
 

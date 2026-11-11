@@ -25,6 +25,7 @@ tab closed untouched leaves no session behind.
 | `update` | Install the latest release now. |
 | `--resume [ID]` | Resume a session by id or unique prefix, or pick from a list, and reconnect to its device. Takes no target. |
 | `--backend URL` | Backend base URL. Default `https://cli.supertrace.ai`. |
+| `--read-only` | Refuse every command known to change a device or this machine, and hide the write tools from the agent. Same as `read_only` in `config.json`. See [read_only](configuration.md#read_only). |
 | `--theme NAME` | `auto`, `dark`, `light` or `mono`. |
 | `--debug` | Error detail in the TUI, plus `stcli-debug.log` in the working directory. |
 
