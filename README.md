@@ -76,8 +76,10 @@ with Homebrew, or auto-update is off through `STCLI_NO_AUTO_UPDATE` or
 `auto_update: false`), it says how to update and exits. Minor differences never
 need an update.
 
-Needs a real terminal, SSH reach to your devices, and HTTPS to
-`cli.supertrace.ai`. Pinning a version or directory, and offline verification,
+Needs a real terminal at least 70 columns by 20 rows, SSH reach to your
+devices, and HTTPS to `cli.supertrace.ai`. In a smaller window stcli shows only
+the size it needs and ignores every key but `ctrl+c` until the window grows, so
+no key can answer an approval you cannot see. Pinning a version or directory, and offline verification,
 are in [docs/install.md](docs/install.md).
 
 ## First run
