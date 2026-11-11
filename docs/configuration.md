@@ -51,9 +51,11 @@ The on/off settings and the theme can also be changed from inside stcli with
 
 Keyed by the host as you type it or by the address dialled, case-insensitive.
 `legacy_algorithms: true` enables obsolete SSH crypto (`ssh-rsa`, SHA-1 key
-exchange, CBC ciphers) for that host only. stcli never retries with weaker
-crypto after a failed handshake, and the TUI warns once per connection when
-this is on.
+exchange, CBC ciphers) for that host only. An `~/.ssh/config` line that adds an
+obsolete algorithm to the host's block does the same (see **Old gear** below).
+stcli never retries with weaker crypto after a failed handshake. The TUI warns
+once per connection, naming the obsolete algorithms the device actually
+negotiated; a host that opted in but negotiates strong crypto gets no warning.
 
 ## `commands`
 
@@ -141,13 +143,50 @@ rests on colour alone.
 `HostName`, `Port`, `User`, `IdentityFile`, `IdentityAgent`, `ProxyJump`
 (chained), `UserKnownHostsFile`, `HashKnownHosts`, `StrictHostKeyChecking`,
 `Include`, `PubkeyAuthentication`, `PasswordAuthentication`,
-`KbdInteractiveAuthentication`. Resolution follows OpenSSH: first value wins,
-`IdentityFile` and `UserKnownHostsFile` accumulate.
+`KbdInteractiveAuthentication`, and the algorithm lists `KexAlgorithms`,
+`Ciphers`, `MACs`, `HostKeyAlgorithms` and `PubkeyAcceptedAlgorithms`.
+Resolution follows OpenSSH: first value wins, `IdentityFile` and
+`UserKnownHostsFile` accumulate. `ProxyJump` also takes `ssh://user@host:port`.
 
 Any other keyword that could change which host is reached or how it
 authenticates fails the connection and names the keyword, file and line.
 Cosmetic keywords such as `Compression`, `ConnectTimeout` and `LogLevel` are
 ignored. `ProxyCommand` is not supported; use `ProxyJump`.
+
+### Old gear
+
+The lines you already have for old switches work:
+
+```
+Host old-switch
+  KexAlgorithms +diffie-hellman-group1-sha1
+  HostKeyAlgorithms +ssh-rsa
+  PubkeyAcceptedAlgorithms +ssh-rsa
+```
+
+Any obsolete name in a host's algorithm lists turns on the whole obsolete set
+for that host only, the same as `legacy_algorithms`. stcli still offers strong
+algorithms first. A `-` list is refused, and so is a name stcli cannot speak,
+naming it.
+
+When a device needs the opt-in and the host doesn't have it, the connection
+fails with a short error: what the device offered, one line saying how to fix
+it, and a `Host` block you can paste into `~/.ssh/config` as is. `--debug` adds
+the underlying SSH error.
+
+Without that opt-in, an RSA login key signs with SHA-2 only. A device that
+accepts only `ssh-rsa` signatures (most older Cisco IOS) fails the same way,
+with `PubkeyAcceptedAlgorithms +ssh-rsa` in the block, and no login attempt is
+spent on it.
+
+Some things no setting reaches: DSA keys (`ssh-dss`) as host or login keys,
+RC4 and MD5, `aes192-cbc` and `aes256-cbc`, RSA keys under 1024 bits, and SSH
+protocol 1. A device that offers only these fails with an error naming what it
+offered and the fix on the device, such as `crypto key generate rsa modulus
+2048` or `ip ssh version 2`. An `IdentityFile` stcli cannot use (DSA, a small
+RSA key, a PuTTY `.ppk`, a `.pub`) is named with the reason.
+
+### Host keys
 
 Host keys are always verified against `~/.ssh/known_hosts`. An unknown key
 shows its fingerprint in the TUI and asks before trusting it. A changed key is
