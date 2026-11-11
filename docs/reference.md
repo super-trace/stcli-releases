@@ -108,11 +108,15 @@ Defaults; every name is rebindable in `config.json`, see
 | `ctrl+l` / `ctrl+end` | Jump to the latest output. While you are scrolled back, the line above the input says so, and with the mouse on, clicking it jumps too. Sending a message also jumps. |
 | `ctrl+left` / `ctrl+right` | Previous / next tab. |
 | `alt+1` … `alt+9` | Jump to tab. |
-| `ctrl+c` twice | Quit. |
+| `ctrl+c` twice | Quit. While a mouse selection is on screen, `ctrl+c` copies it instead. |
 | `ctrl+d` twice | Close this tab, or quit on the last one. |
 
 Dragging over the transcript selects text and copies it on release; a double
-click takes a word and a triple click a row. Over SSH the copy relies on your
+click takes a word and a triple click a row. `ctrl+c` copies the selection
+again and releases it, and so does `cmd+c` in a terminal that passes it on;
+your terminal's own copy shortcut does not see the selection. To select
+without copying, set [`copy_on_select`](configuration.md) to `false`: the line
+above the input then says `ctrl+c to copy`. Over SSH the copy relies on your
 terminal accepting OSC 52. Under tmux, stcli hands the text to tmux, which keeps
 it as a paste buffer and passes it on to your terminal with its default
 settings. Any other tmux between stcli and your terminal, such as one on your
