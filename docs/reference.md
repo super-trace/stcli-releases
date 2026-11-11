@@ -120,6 +120,12 @@ own machine with stcli over SSH inside it, needs `set-clipboard on`, which lets
 any program in tmux set your clipboard. Where the copy is not
 accepted, press `ctrl+o` and select with the terminal or with tmux.
 
+A GitHub Codespace opened in the browser does not accept the copy. There the
+line above the input reads `copy may fail in codespace · ctrl+o for native
+select`: press `ctrl+o`, select with the terminal and copy with its own
+shortcut. A Codespace opened in desktop VS Code shows the same line and may
+copy anyway.
+
 Keys reach the active tab only; background tabs keep streaming and park their
 approval prompts until you switch. The tab strip marks `!` for a waiting
 prompt, `…` for a turn in flight, and `✗` for a disconnected device.
