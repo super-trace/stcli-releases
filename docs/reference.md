@@ -76,14 +76,20 @@ and saves it at once, and `esc` closes the dialog and says what changed.
 | --- | --- | --- |
 | `ui.mouse` | `on`, `off` | At once, in every tab |
 | `ui.copy_on_select` | `on`, `off` | At once, in every tab |
-| `ui.theme` | `auto`, `dark`, `light`, `mono` | When stcli restarts |
-| `ui.high_contrast`, `ui.reduced_motion`, `ui.ascii`, `ui.screen_reader` | `off`, `on` | When stcli restarts |
+| `ui.theme` | `auto`, `dark`, `light`, `mono` | At once, in every tab |
+| `ui.syntax` | `on`, `off` | At once, in every tab |
+| `ui.high_contrast`, `ui.reduced_motion` | `off`, `on` | At once, in every tab |
+| `ui.ascii`, `ui.screen_reader` | `off`, `on` | When stcli restarts |
 | `auto_update` | `on`, `off` | When stcli restarts |
 
 Changes are saved to `config.json`, next to whatever else it holds. Key
 bindings, colours, hosts, command rules and MCP servers are not in `/config`;
 edit them in the file as [configuration.md](configuration.md) describes. A
 change you make to the file by hand takes effect when stcli restarts.
+
+A theme set this way replaces `--theme` and `STCLI_THEME` until stcli exits.
+`auto` goes back to the light or dark background stcli started with: the
+terminal is only asked at startup.
 
 ### Asking the agent
 
