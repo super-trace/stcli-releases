@@ -133,7 +133,9 @@ shows the same.
 An unanswered prompt times out after five minutes and the agent is told the
 command did not run. A `!` command skips the dialog, but a destructive one
 still asks for the phrase. Reading, listing or editing a file on your machine,
-or running a local command, opens its own dialog.
+or running a local command, opens its own dialog. On Windows a local command
+runs in PowerShell, and destructive cmdlets such as `Remove-Item -Recurse` or
+`Format-Volume` ask for the phrase too.
 
 A configuration change of more than one line arrives as one block, not one
 command at a time. stcli stages it in the device's own configuration session,
