@@ -61,13 +61,16 @@ http_get() {
   fi
 }
 
+# A download that stalls (under 1 KB/s for 30 s) or fails transiently is
+# retried rather than left hanging with no output.
 http_download() {
   url="$1"
   output="$2"
   if command -v curl >/dev/null 2>&1; then
-    curl -fsSL -o "$output" "$url"
+    curl -fsSL --connect-timeout 15 --speed-limit 1024 --speed-time 30 \
+      --retry 3 --retry-delay 2 -o "$output" "$url"
   elif command -v wget >/dev/null 2>&1; then
-    wget -q -O "$output" "$url"
+    wget -q --timeout=30 --tries=3 -O "$output" "$url"
   else
     fail "curl or wget is required but neither is installed."
   fi
@@ -97,10 +100,7 @@ download_and_verify() {
   TMP_DIR=$(mktemp -d)
   trap 'rm -rf "$TMP_DIR" "${STAGED:-}"' EXIT
 
-  echo "Downloading stcli v${VERSION}..."
   http_download "$BASE_URL/checksums.txt" "$TMP_DIR/checksums.txt"
-
-  echo "Verifying checksum..."
   EXPECTED=$(awk -v asset="$ARCHIVE" 'NF == 2 && $2 == asset { print $1 }' "$TMP_DIR/checksums.txt")
   if ! printf '%s\n' "$EXPECTED" | LC_ALL=C grep -Eq '^[a-fA-F0-9]{64}$' ||
      [ "$(printf '%s\n' "$EXPECTED" | wc -l | tr -d ' ')" != "1" ]; then
@@ -108,7 +108,10 @@ download_and_verify() {
   fi
   EXPECTED=$(printf '%s' "$EXPECTED" | tr '[:upper:]' '[:lower:]')
 
+  echo "Downloading stcli v${VERSION}..."
   http_download "$BASE_URL/$ARCHIVE" "$TMP_DIR/$ARCHIVE"
+
+  echo "Verifying checksum..."
 
   if command -v sha256sum >/dev/null 2>&1; then
     ACTUAL=$(sha256sum "$TMP_DIR/$ARCHIVE" | cut -d' ' -f1)
@@ -179,7 +182,10 @@ setup_path() {
   mkdir -p "$(dirname "$PROFILE")"
   echo "" >> "$PROFILE"
   echo "$EXPORT_LINE" >> "$PROFILE"
-  echo "Added $INSTALL_DIR to PATH in $PROFILE"
+  case "$PROFILE" in
+    "$HOME"/*) echo "Added $INSTALL_DIR to PATH in ~${PROFILE#"$HOME"}" ;;
+    *) echo "Added $INSTALL_DIR to PATH in $PROFILE" ;;
+  esac
   NEEDS_SOURCE=true
 }
 
