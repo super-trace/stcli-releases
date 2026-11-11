@@ -92,7 +92,7 @@ configurable.
 | Name | Default |
 | --- | --- |
 | `submit` | `enter` |
-| `newline` | `alt+enter`, `ctrl+j` |
+| `newline` | `alt+enter`, `ctrl+j`. A setting here now also changes the key the input box uses for a newline. |
 | `send_now` | `ctrl+enter` |
 | `interrupt` | `esc` |
 | `prev_block` / `next_block` | `ctrl+up` / `ctrl+down` |

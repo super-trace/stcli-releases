@@ -95,7 +95,7 @@ Defaults; every name is rebindable in `config.json`, see
 | Key | Action |
 | --- | --- |
 | `enter` | Send. During a turn, queue the message for when it ends. |
-| `alt+enter`, `ctrl+j` | Newline. |
+| `alt+enter`, `ctrl+j` | Newline. On Windows use `ctrl+j`: Windows Terminal and the classic console take `alt+enter` for fullscreen. |
 | `ctrl+enter` | Interrupt the running turn and send now. Needs a terminal that reports modified keys (kitty, Ghostty, WezTerm, iTerm2); elsewhere it acts like `enter`. |
 | `esc` | Interrupt the turn; cancel a dialog. |
 | `tab` | In a configuration-block dialog, switch between the Config and Diff tabs; `up` / `down` and `pgup` / `pgdown` scroll it. |
