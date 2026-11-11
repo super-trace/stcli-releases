@@ -102,23 +102,33 @@ Defaults; every name is rebindable in `config.json`, see
 | `up` / `down` | Input history, from the input's first or last line. `up` on an empty input pulls back the last queued message. |
 | `ctrl+up` / `ctrl+down` | Select the previous / next command block. |
 | `ctrl+e` | Expand or collapse the selected block. |
-| `ctrl+y` | Copy the selected block, or the most recent one: the command and its full output. |
+| `ctrl+y` | Copy the mouse selection while one is on screen; otherwise the selected block, or the most recent one: the command and its full output. |
 | `ctrl+o` | Turn mouse reporting off or on, so the terminal can select text itself. |
 | `pgup` / `pgdown` | Scroll. |
 | `ctrl+l` / `ctrl+end` | Jump to the latest output. While you are scrolled back, the line above the input says so, and with the mouse on, clicking it jumps too. Sending a message also jumps. |
 | `ctrl+left` / `ctrl+right` | Previous / next tab. |
 | `alt+1` … `alt+9` | Jump to tab. |
-| `ctrl+c` twice | Quit. |
+| `ctrl+c` twice | Quit. While a mouse selection is on screen, `ctrl+c` copies it instead. |
 | `ctrl+d` twice | Close this tab, or quit on the last one. |
 
 Dragging over the transcript selects text and copies it on release; a double
-click takes a word and a triple click a row. Over SSH the copy relies on your
+click takes a word and a triple click a row. `ctrl+c` copies the selection
+again and releases it, and so does `cmd+c` in a terminal that passes it on;
+your terminal's own copy shortcut does not see the selection. To select
+without copying, set [`copy_on_select`](configuration.md) to `false`: the line
+above the input then says `ctrl+c to copy`. Over SSH the copy relies on your
 terminal accepting OSC 52. Under tmux, stcli hands the text to tmux, which keeps
 it as a paste buffer and passes it on to your terminal with its default
 settings. Any other tmux between stcli and your terminal, such as one on your
 own machine with stcli over SSH inside it, needs `set-clipboard on`, which lets
 any program in tmux set your clipboard. Where the copy is not
 accepted, press `ctrl+o` and select with the terminal or with tmux.
+
+A GitHub Codespace opened in the browser does not accept the copy. There the
+line above the input reads `copy may fail in codespace · ctrl+o for native
+select`: press `ctrl+o`, select with the terminal and copy with its own
+shortcut. A Codespace opened in desktop VS Code shows the same line and may
+copy anyway.
 
 Keys reach the active tab only; background tabs keep streaming and park their
 approval prompts until you switch. The tab strip marks `!` for a waiting
