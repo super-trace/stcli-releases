@@ -137,14 +137,17 @@ install_binary() {
   mv -f "$STAGED" "$INSTALL_DIR/stcli"
   STAGED=""
 
-  if command -v brew >/dev/null 2>&1; then
-    BREW_STCLI=$(brew --prefix 2>/dev/null)/bin/stcli
-    if [ -f "$BREW_STCLI" ]; then
+  # Never invoke `brew` itself: on Linux (e.g. Codespaces) a cold brew run can
+  # take minutes. Checking the well-known prefixes is enough for this hint.
+  for BREW_PREFIX in "${HOMEBREW_PREFIX:-}" /opt/homebrew /usr/local /home/linuxbrew/.linuxbrew; do
+    [ -n "$BREW_PREFIX" ] || continue
+    if [ -d "$BREW_PREFIX/Cellar/stcli" ]; then
       echo ""
-      echo "Note: stcli is also installed via Homebrew at $BREW_STCLI"
+      echo "Note: stcli is also installed via Homebrew at $BREW_PREFIX/bin/stcli"
       echo "You may want to run 'brew uninstall stcli' to avoid confusion."
+      break
     fi
-  fi
+  done
 }
 
 setup_path() {
