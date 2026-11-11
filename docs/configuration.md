@@ -110,11 +110,11 @@ configurable.
 
 | Key | Description |
 | --- | --- |
-| `theme` | `auto` follows the terminal background (default); `dark`; `light`; `mono` uses no colour, bold and reverse video carry meaning. |
+| `theme` | `auto` follows the terminal background (default), or is `mono` when `NO_COLOR` is set; `dark`; `light`; `mono` uses no colour, bold and reverse video carry meaning. On a 16-colour terminal (`TERM=xterm`, PuTTY's default) the palette uses the 16 ANSI colours. |
 | `colors` | Overrides a palette role with `#rrggbb` or an ANSI 256 index. Roles: `accent`, `muted`, `faint`, `warn`, `danger`, `ok`, `ink`. |
 | `high_contrast` | Lifts dim text to readable levels, thickens borders, underlines the active tab. |
 | `reduced_motion` | Replaces the thinking spinner with a static mark. |
-| `ascii` | Replaces box drawing, half-block caps and the spinner with ASCII; markdown renders in the `ascii` style. |
+| `ascii` | Draws stcli's own screen in ASCII: box drawing, half-block caps, the spinner, arrows, separators and ellipses; markdown renders in the `ascii` style. Commands, device output and the agent's text are shown as they are. On by default when `TERM` is `linux` or `vt*`. |
 | `mouse` | `false` starts with mouse reporting off, so the terminal selects text and the wheel does not scroll the transcript. Default `true`; `ctrl+o` switches it while running. |
 | `screen_reader` | Drops borders, bubbles and input chrome for text labels (`you:`, `assistant:`, `error:`). Implies `ascii` and `reduced_motion`. |
 

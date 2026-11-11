@@ -33,7 +33,9 @@ detect_platform() {
       case "$ARCH" in
         x86_64|amd64) ARCH_LABEL="amd64" ;;
         arm64|aarch64) ARCH_LABEL="arm64" ;;
-        *) fail "unsupported architecture: $ARCH" "Supported: x86_64, arm64." ;;
+        armv7l|armv7|armv8l) ARCH_LABEL="armv7" ;;
+        armv6l) fail "unsupported architecture: $ARCH" "32-bit ARM needs ARMv7: a Raspberry Pi 2 or later." ;;
+        *) fail "unsupported architecture: $ARCH" "Supported: x86_64, arm64, armv7." ;;
       esac
       ;;
     *) fail "unsupported operating system: $OS" "Supported: macOS, Linux, WSL. For Windows, use install.ps1." ;;
