@@ -182,7 +182,10 @@ setup_path() {
   mkdir -p "$(dirname "$PROFILE")"
   echo "" >> "$PROFILE"
   echo "$EXPORT_LINE" >> "$PROFILE"
-  echo "Added $INSTALL_DIR to PATH in $PROFILE"
+  case "$PROFILE" in
+    "$HOME"/*) echo "Added $INSTALL_DIR to PATH in ~${PROFILE#"$HOME"}" ;;
+    *) echo "Added $INSTALL_DIR to PATH in $PROFILE" ;;
+  esac
   NEEDS_SOURCE=true
 }
 
