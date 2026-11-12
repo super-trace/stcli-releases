@@ -122,15 +122,13 @@ configurable.
 | `ascii` | Replaces box drawing, half-block caps and the spinner with ASCII; markdown renders in the `ascii` style. |
 | `mouse` | `false` starts with mouse reporting off, so the terminal selects text and the wheel does not scroll the transcript. Default `true`; `ctrl+o` switches it while running. |
 | `copy_on_select` | `false` makes a mouse selection only highlight; `ctrl+c` or `ctrl+y` copies it. Default `true`. |
-| `syntax` | `false` leaves code blocks, diffs and JSON arguments in one colour. Default `true`. |
+| `syntax` | `false` turns syntax highlighting off. Default `true`. |
 | `screen_reader` | Drops borders, bubbles and input chrome for text labels (`you:`, `assistant:`, `error:`). Implies `ascii` and `reduced_motion`. |
 
-Code blocks in the agent's replies are highlighted in the `dark` and `light`
-themes, by the language named on the block, and so are the JSON arguments of an
-MCP tool call in its dialog. The added and removed lines of a diff take the
-`ok` and `danger` colours. `mono`, `ascii` and `"syntax": false` leave all of
-it in one colour. `high_contrast` leaves code in one colour and keeps the diff
-colours, and a reply longer than 16 KiB is not highlighted.
+stcli highlights code in the `dark` and `light` themes: code blocks in the
+agent's replies, and command output or files whose format it can tell, such as
+JSON, YAML, XML and scripts. Diffs show added and removed lines in the `ok` and
+`danger` colours. `"syntax": false`, `mono` and `ascii` turn highlighting off.
 
 Command badges and block states are always spelled out in words, so no meaning
 rests on colour alone.
