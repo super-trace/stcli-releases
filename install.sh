@@ -42,38 +42,26 @@ detect_platform() {
   echo "Detected: $OS $ARCH"
 }
 
-http_get() {
-  url="$1"
-  if command -v curl >/dev/null 2>&1; then
-    if [ -n "${GITHUB_TOKEN:-}" ]; then
-      curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" "$url"
+# Retries live here because BusyBox wget ignores --tries and curl's --retry skips refused connections.
+fetch() {
+  output="$1"
+  url="$2"
+  header="${3:-}"
+  for attempt in 1 2 3; do
+    if command -v curl >/dev/null 2>&1; then
+      curl -fsSL --connect-timeout 15 --speed-limit 1024 --speed-time 30 ${header:+-H "$header"} -o "$output" "$url" && return
+    elif command -v wget >/dev/null 2>&1; then
+      wget -q -T 30 ${header:+--header="$header"} -O "$output" "$url" && return
     else
-      curl -fsSL "$url"
+      fail "curl or wget is required but neither is installed."
     fi
-  elif command -v wget >/dev/null 2>&1; then
-    if [ -n "${GITHUB_TOKEN:-}" ]; then
-      wget -qO- --header="Authorization: Bearer $GITHUB_TOKEN" "$url"
-    else
-      wget -qO- "$url"
-    fi
-  else
-    fail "curl or wget is required but neither is installed."
-  fi
+    [ "$attempt" = 3 ] || { echo "Request failed, retrying..." >&2; sleep 2; }
+  done
+  fail "could not download $url"
 }
 
-# A download that stalls (under 1 KB/s for 30 s) or fails transiently is
-# retried rather than left hanging with no output.
-http_download() {
-  url="$1"
-  output="$2"
-  if command -v curl >/dev/null 2>&1; then
-    curl -fsSL --connect-timeout 15 --speed-limit 1024 --speed-time 30 \
-      --retry 3 --retry-delay 2 -o "$output" "$url"
-  elif command -v wget >/dev/null 2>&1; then
-    wget -q --timeout=30 --tries=3 -O "$output" "$url"
-  else
-    fail "curl or wget is required but neither is installed."
-  fi
+http_get() {
+  fetch - "$1" ${GITHUB_TOKEN:+"Authorization: Bearer $GITHUB_TOKEN"}
 }
 
 get_version() {
@@ -100,7 +88,8 @@ download_and_verify() {
   TMP_DIR=$(mktemp -d)
   trap 'rm -rf "$TMP_DIR" "${STAGED:-}"' EXIT
 
-  http_download "$BASE_URL/checksums.txt" "$TMP_DIR/checksums.txt"
+  echo "Downloading stcli v${VERSION}..."
+  fetch "$TMP_DIR/checksums.txt" "$BASE_URL/checksums.txt"
   EXPECTED=$(awk -v asset="$ARCHIVE" 'NF == 2 && $2 == asset { print $1 }' "$TMP_DIR/checksums.txt")
   if ! printf '%s\n' "$EXPECTED" | LC_ALL=C grep -Eq '^[a-fA-F0-9]{64}$' ||
      [ "$(printf '%s\n' "$EXPECTED" | wc -l | tr -d ' ')" != "1" ]; then
@@ -108,11 +97,9 @@ download_and_verify() {
   fi
   EXPECTED=$(printf '%s' "$EXPECTED" | tr '[:upper:]' '[:lower:]')
 
-  echo "Downloading stcli v${VERSION}..."
-  http_download "$BASE_URL/$ARCHIVE" "$TMP_DIR/$ARCHIVE"
+  fetch "$TMP_DIR/$ARCHIVE" "$BASE_URL/$ARCHIVE"
 
   echo "Verifying checksum..."
-
   if command -v sha256sum >/dev/null 2>&1; then
     ACTUAL=$(sha256sum "$TMP_DIR/$ARCHIVE" | cut -d' ' -f1)
   elif command -v shasum >/dev/null 2>&1; then

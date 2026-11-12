@@ -61,14 +61,15 @@ with tempfile.TemporaryDirectory(prefix='stcli-install-') as directory:
     archive = assets / f"stcli_test_{fixture_target()}.{'zip' if windows else 'tar.gz'}"
     write_fixture(archive)
 
-    fail_archive = [0]  # how many archive requests answer 503 before succeeding
+    failures = {}
 
     class Handler(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *args): super().__init__(*args, directory=str(site))
         def log_message(self, *args): pass
         def do_GET(self):
-            if fail_archive[0] and self.path.endswith(archive.name):
-                fail_archive[0] -= 1
+            name = self.path.rsplit('/', 1)[-1]
+            if failures.get(name):
+                failures[name] -= 1
                 self.send_error(503)
                 return
             super().do_GET()
@@ -106,11 +107,9 @@ with tempfile.TemporaryDirectory(prefix='stcli-install-') as directory:
             assert rejected.returncode and 'hecksum verification failed' in rejected.stdout + rejected.stderr, rejected
             assert executable.read_bytes() == before
             write_fixture(archive)
-            if not windows:
-                # A transient failure on the binary download is retried, not fatal.
-                fail_archive[0] = 1
-                retried = subprocess.run(shell, env=env, capture_output=True, text=True)
-                assert retried.returncode == 0 and fail_archive[0] == 0, retried
+            failures.update({'latest': 1, 'checksums.txt': 1, archive.name: 2})
+            retried = subprocess.run(shell, env=env, capture_output=True, text=True)
+            assert retried.returncode == 0 and not any(failures.values()), retried
             executable.unlink()
             if not windows:
                 fish = dict(env, SHELL='/usr/bin/fish', STCLI_VERSION='test')

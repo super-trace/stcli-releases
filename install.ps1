@@ -13,6 +13,16 @@ function Get-ApiHeaders {
     return $headers
 }
 
+function Invoke-WithRetry([scriptblock]$Request) {
+    for ($attempt = 1; ; $attempt++) {
+        try { return & $Request } catch {
+            if ($attempt -ge 3) { throw }
+            Write-Host "Request failed, retrying..."
+            Start-Sleep -Seconds 2
+        }
+    }
+}
+
 function Detect-Platform {
     if ($env:OS -ne "Windows_NT") { throw "Use install.sh on macOS, Linux, or WSL." }
     $machine = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }
@@ -28,7 +38,7 @@ function Detect-Platform {
 
 function Get-LatestVersion {
     try {
-        $release = Invoke-RestMethod -Uri "$ApiUrl/repos/$GitHubRepo/releases/latest" -Headers (Get-ApiHeaders) -UseBasicParsing
+        $release = Invoke-WithRetry { Invoke-RestMethod -Uri "$ApiUrl/repos/$GitHubRepo/releases/latest" -Headers (Get-ApiHeaders) -UseBasicParsing }
         $script:LatestVersion = $release.tag_name -replace "^v", ""
     } catch {
         throw "Could not determine the latest version: $($_.Exception.Message)`nCheck your internet connection, or set GITHUB_TOKEN if you are being rate limited."
@@ -55,9 +65,8 @@ function Download-And-Verify {
     $checksumsPath = Join-Path $script:TmpDir "checksums.txt"
 
     Write-Host "Downloading stcli v${script:Version}..."
-    Invoke-WebRequest -Uri "$baseUrl/checksums.txt" -OutFile $checksumsPath -UseBasicParsing
+    Invoke-WithRetry { Invoke-WebRequest -Uri "$baseUrl/checksums.txt" -OutFile $checksumsPath -UseBasicParsing }
 
-    Write-Host "Verifying checksum..."
     $expected = $null
     foreach ($line in Get-Content $checksumsPath) {
         $parts = $line.Trim() -split "\s+", 2
@@ -68,7 +77,9 @@ function Download-And-Verify {
     }
     if (-not $expected) { throw "Checksum entry not found for $archive" }
 
-    Invoke-WebRequest -Uri "$baseUrl/$archive" -OutFile $archivePath -UseBasicParsing
+    Invoke-WithRetry { Invoke-WebRequest -Uri "$baseUrl/$archive" -OutFile $archivePath -UseBasicParsing }
+
+    Write-Host "Verifying checksum..."
     $actual = (Get-FileHash -Path $archivePath -Algorithm SHA256).Hash.ToLower()
     if ($actual -ne $expected) {
         throw "Checksum verification failed.`n  Expected: $expected`n  Actual:   $actual`nThe downloaded file may be corrupted. Please try again."
