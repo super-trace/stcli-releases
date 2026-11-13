@@ -111,8 +111,9 @@ stcli login | logout | version | update
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. |
 
 Every target dials into one session; run another stcli for a second session.
-`--resume` brings back a past session on the device it was on. Flags, environment variables, every slash command and every
-key are in [docs/reference.md](docs/reference.md); `/help` inside the TUI
+`--resume` brings back a past session on the device it was on. Flags,
+environment variables, every slash command and every key are in
+[docs/reference.md](docs/reference.md); `/help` inside the TUI
 shows the same.
 
 | In the TUI | Description |

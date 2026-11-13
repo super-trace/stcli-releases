@@ -151,7 +151,7 @@ Defaults; every name is rebindable in `config.json`, see
 | `pgup` / `pgdown` | Scroll. |
 | `ctrl+l` / `ctrl+end` | Jump to the latest output. While you are scrolled back, the line above the input says so, and with the mouse on, clicking it jumps too. Sending a message also jumps. |
 | `ctrl+c` twice | Quit. While a mouse selection is on screen, `ctrl+c` copies it instead. |
-| `ctrl+d` twice | Quit. |
+| `ctrl+d` twice | Quit, on an empty input. |
 
 Dragging over the transcript selects text and copies it on release; a double
 click takes a word and a triple click a row. `ctrl+c` copies the selection
