@@ -129,7 +129,7 @@ shows the same.
 | --- | --- |
 | read-only | Runs immediately. |
 | needs approval | `y` runs once, `n` denies. |
-| unknown | Same, plus `r` to remember it as read-only in `config.json`. |
+| unknown | Same, plus `r` to remember it as read-only in `config.json`, or `t` to run it and let further unrecognised read-like commands run unasked until the turn ends. A command with `>`, `tee`, `rm`, `mv`, `cp`, `dd`, `sudo` or a package manager still asks. |
 | destructive | Type the confirmation phrase shown, then `enter`. |
 
 An unanswered prompt times out after five minutes and the agent is told the
@@ -138,6 +138,13 @@ still asks for the phrase. Reading, listing or editing a file on your machine,
 or running a local command, opens its own dialog. On Windows a local command
 runs in PowerShell, and destructive cmdlets such as `Remove-Item -Recurse` or
 `Format-Volume` ask for the phrase too.
+
+On platforms configured line by line, such as SONiC or a Linux host, a change of
+several commands arrives as one batch: a single dialog lists every command with
+its class, its purpose and any rollback, `y` runs them in order and `n` runs
+none. Read-only commands in it never open the dialog. The batch stops at the
+first command that fails, `esc` stops it after the running command finishes,
+and a destructive command is never batched: it asks for its phrase on its own.
 
 A configuration change of more than one line arrives as one block, not one
 command at a time. stcli stages it in the device's own configuration session,
