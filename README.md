@@ -171,9 +171,10 @@ for a documented subset. Both are in [docs/configuration.md](docs/configuration.
 ## Releases and verification
 
 Releases are tagged by UTC date, `vYYYY.MM.DD`, with `.2`, `.3` for further
-releases that day. Each ships five archives, `checksums.txt` and
-`provenance.json`, which records the source commit and toolchain. The releases
-page is the changelog.
+releases that day. Each ships five archives, `checksums.txt`,
+`provenance.json`, which records the source commit and toolchain, and
+`THIRD_PARTY_NOTICES.md`, the licenses of the open-source modules linked in.
+The releases page is the changelog.
 
 | Platform | Package | Signing |
 | --- | --- | --- |
@@ -203,6 +204,11 @@ there instead. Drop the `PATH` entry the installer added. A Homebrew install
 goes with `brew uninstall stcli`. `rm -r
 ~/.config/stcli` (`$XDG_CONFIG_HOME/stcli` when that variable is set) removes
 credentials and the config file.
+
+## License
+
+stcli is proprietary software; see [LICENSE.md](LICENSE.md). The open-source
+components it links are listed with their licenses in each release.
 
 ## Support
 
