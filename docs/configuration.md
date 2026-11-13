@@ -136,11 +136,13 @@ rests on colour alone.
 ## SSH configuration
 
 `~/.ssh/config` is honoured for: `Host` (with `*`, `?` and `!` negation),
-`HostName`, `Port`, `User`, `IdentityFile`, `IdentityAgent`, `ProxyJump`
+`HostName`, `Port`, `User`, `IdentityFile`, `IdentitiesOnly`, `IdentityAgent`, `ProxyJump`
 (chained), `UserKnownHostsFile`, `HashKnownHosts`, `StrictHostKeyChecking`,
 `Include`, `PubkeyAuthentication`, `PasswordAuthentication`,
 `KbdInteractiveAuthentication`. Resolution follows OpenSSH: first value wins,
-`IdentityFile` and `UserKnownHostsFile` accumulate.
+`IdentityFile` and `UserKnownHostsFile` accumulate. With `IdentitiesOnly yes`,
+only that host's `IdentityFile` keys are offered; ssh-agent can still sign for
+one of them, but its other keys are not offered.
 
 Any other keyword that could change which host is reached or how it
 authenticates fails the connection and names the keyword, file and line.
