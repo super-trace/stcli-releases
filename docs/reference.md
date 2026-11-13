@@ -14,9 +14,10 @@ stcli login | logout | version | update
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config` or a bracketed IPv6 literal. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. Options: `?context=`, `?container=`, `?shell=`. |
 
-Each target opens its own tab. With none, the TUI opens one unbound tab. A new tab's
-session is created when its first device connects or its first message is sent, so a
-tab closed untouched leaves no session behind.
+Every target dials into one session. With none, the TUI opens one unbound
+session. The session is created when its first device connects or its first
+message is sent, so stcli closed untouched leaves no session behind. One stcli
+runs one session; run another stcli for a second.
 
 | Command / flag | Description |
 | --- | --- |
@@ -43,18 +44,17 @@ tab closed untouched leaves no session behind.
 
 | Command | Alias | Description |
 | --- | --- | --- |
-| `/connect [target]` | `/c` | Redial this tab, or pick which session a new target joins. |
-| `/add <target>` | | Add a device to this session, no dialog. Up to 8 per session. |
-| `/new [target]` | `/n` | Start a fresh session with no devices, or open a new tab on target. |
-| `/clear` | | Start a fresh conversation, keeping this tab's devices. |
+| `/connect [target]` | `/c` | Dial target into this session; without one, redial. |
+| `/add <target>` | | Add a device to this session. Up to 8 per session. |
+| `/new [target]` | `/n` | Start a fresh session with no devices, then dial target. |
+| `/clear` | | Start a fresh conversation, keeping this session's devices. |
 | `/disconnect [label]` | | Close one device. |
-| `/sessions [--new] <n\|id>` | | List past sessions; resume one here or in a new tab. |
-| `/switch [n\|device]` | `/s` | Pick a tab, or jump to one. |
-| `/close` | | Close this tab; on the last tab, quit. |
+| `/sessions [n\|id]` | | List past sessions and resume one. |
 | `/mcp [list\|add\|remove]` | | Manage MCP servers. See [MCP servers](#mcp-servers). |
-| `/usage` | | Account token and command accounting. |
+| `/usage` | `/credits` | Credits remaining, then token and command accounting. |
 | `/copy` | | Copy the agent's last reply as markdown. |
 | `/config [key=value]` | | Open the settings dialog, or change one setting. See [Settings](#settings). |
+| `/feedback <message>` | | Send feedback about stcli to the team, with your stcli version and session. |
 | `/help` | `/h`, `/?` | Commands and keys. |
 | `/quit` | `/q`, `/exit` | Leave. |
 
@@ -75,11 +75,11 @@ and saves it at once, and `esc` closes the dialog and says what changed.
 
 | Setting | Values | Takes effect |
 | --- | --- | --- |
-| `ui.mouse` | `on`, `off` | At once, in every tab |
-| `ui.copy_on_select` | `on`, `off` | At once, in every tab |
-| `ui.theme` | `auto`, `dark`, `light`, `mono` | At once, in every tab |
-| `ui.syntax` | `on`, `off` | At once, in every tab |
-| `ui.high_contrast`, `ui.reduced_motion` | `off`, `on` | At once, in every tab |
+| `ui.mouse` | `on`, `off` | At once |
+| `ui.copy_on_select` | `on`, `off` | At once |
+| `ui.theme` | `auto`, `dark`, `light`, `mono` | At once |
+| `ui.syntax` | `on`, `off` | At once |
+| `ui.high_contrast`, `ui.reduced_motion` | `off`, `on` | At once |
 | `ui.ascii`, `ui.screen_reader` | `off`, `on` | When stcli restarts |
 | `auto_update` | `on`, `off` | When stcli restarts |
 
@@ -128,8 +128,8 @@ approval dialog with the server, the tool, its description and the arguments;
 nothing runs until you press `y` or `enter`. At most 92 tools in total are
 advertised to the agent.
 
-Changes take effect in idle tabs at once, and in a busy tab when its current
-turn ends.
+Changes take effect at once when the agent is idle, or when its current turn
+ends.
 
 ## Keys
 
@@ -150,10 +150,8 @@ Defaults; every name is rebindable in `config.json`, see
 | `ctrl+o` | Turn mouse reporting off or on, so the terminal can select text itself. |
 | `pgup` / `pgdown` | Scroll. |
 | `ctrl+l` / `ctrl+end` | Jump to the latest output. While you are scrolled back, the line above the input says so, and with the mouse on, clicking it jumps too. Sending a message also jumps. |
-| `ctrl+left` / `ctrl+right` | Previous / next tab. |
-| `alt+1` … `alt+9` | Jump to tab. |
 | `ctrl+c` twice | Quit. While a mouse selection is on screen, `ctrl+c` copies it instead. |
-| `ctrl+d` twice | Close this tab, or quit on the last one. |
+| `ctrl+d` twice | Quit. |
 
 Dragging over the transcript selects text and copies it on release; a double
 click takes a word and a triple click a row. `ctrl+c` copies the selection
@@ -173,7 +171,3 @@ line above the input reads `copy may fail in codespace · ctrl+o for native
 select`: press `ctrl+o`, select with the terminal and copy with its own
 shortcut. A Codespace opened in desktop VS Code shows the same line and may
 copy anyway.
-
-Keys reach the active tab only; background tabs keep streaming and park their
-approval prompts until you switch. The tab strip marks `!` for a waiting
-prompt, `…` for a turn in flight, and `✗` for a disconnected device.

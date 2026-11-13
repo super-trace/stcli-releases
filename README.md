@@ -110,14 +110,15 @@ stcli login | logout | version | update
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config`. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. |
 
-Each target opens its own tab. `--resume` brings back a past session on the
-device it was on. Flags, environment variables, every slash command and every
+Every target dials into one session; run another stcli for a second session.
+`--resume` brings back a past session on the device it was on. Flags, environment variables, every slash command and every
 key are in [docs/reference.md](docs/reference.md); `/help` inside the TUI
 shows the same.
 
 | In the TUI | Description |
 | --- | --- |
-| `/connect <target>` | Dial a device; `/add` joins it to this session, `/new` opens a tab. |
+| `/connect <target>` | Dial a device into this session. |
+| `/new`, `/clear` | `/new` starts a fresh session with no devices; `/clear` starts a fresh conversation and keeps them. |
 | `/sessions` | List past sessions and resume one. |
 | `!show bgp summary` | Run a command yourself, no agent turn. `!edge1 cmd` with several devices. |
 | `esc` | Interrupt the turn. `ctrl+c` twice quits. |
@@ -155,15 +156,14 @@ for a documented subset. Both are in [docs/configuration.md](docs/configuration.
 
 ## Tricks
 
-- **Several devices, one conversation.** `stcli core1 core2` opens two tabs;
-  `/add edge1` joins a device to the current session so the agent can compare
-  across them. Up to 8 per session.
-- **Say where it goes.** "connect to edge2 in a new tab" turns the destination
-  dialog into a one-key confirm.
+- **Several devices, one conversation.** `stcli core1 core2` dials both into
+  one session; `/add edge1` joins another so the agent can compare across them.
+  Up to 8 per session. When the session already holds a device, the agent asks
+  before it connects another: `enter` connects, `esc` declines.
 - **Keep typing.** Messages sent during a turn queue up; `ctrl+enter` jumps the
   queue.
 - **Resume by prefix.** `stcli --resume 7f3a` is enough when the prefix is
-  unique; `/sessions --new 3` resumes into a fresh tab.
+  unique; `/sessions 3` resumes the third in the list.
 - **Teach it your platform.** Press `r` on unknown commands; `config.json`
   accumulates an `allow` list tuned to your gear.
 - **Deny the dangerous.** A `deny` rule refuses a command from the agent and
