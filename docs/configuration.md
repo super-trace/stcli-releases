@@ -25,9 +25,8 @@ The on/off settings and the theme can also be changed from inside stcli with
     }
   },
   "keys": {
-    "prev_tab": ["ctrl+pgup"],
-    "next_tab": ["ctrl+pgdown"],
-    "jump_tab": ["ctrl+1", "ctrl+2", "ctrl+3"]
+    "page_up": ["ctrl+b"],
+    "scroll_bottom": ["ctrl+g"]
   },
   "ui": {
     "theme": "auto",
@@ -108,8 +107,6 @@ configurable.
 | `scroll_bottom` | `ctrl+l`, `ctrl+end` |
 | `history_prev` / `history_next` | `up` / `down` |
 | `quit` / `quit_eof` | `ctrl+c` / `ctrl+d` |
-| `prev_tab` / `next_tab` | `ctrl+left` / `ctrl+right` |
-| `jump_tab` | `alt+1` … `alt+9`; list position is the tab number |
 
 ## `ui`
 

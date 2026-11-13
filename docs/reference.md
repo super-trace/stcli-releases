@@ -14,9 +14,9 @@ stcli login | logout | version | update
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config` or a bracketed IPv6 literal. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. Options: `?context=`, `?container=`, `?shell=`. |
 
-Each target opens its own tab. With none, the TUI opens one unbound tab. A new tab's
-session is created when its first device connects or its first message is sent, so a
-tab closed untouched leaves no session behind.
+Every target dials into one session; with none, it opens unbound. The session is
+created when its first device connects or its first message is sent, so stcli closed
+untouched leaves no session behind. For a second session, run another stcli.
 
 | Command / flag | Description |
 | --- | --- |
@@ -43,14 +43,12 @@ tab closed untouched leaves no session behind.
 
 | Command | Alias | Description |
 | --- | --- | --- |
-| `/connect [target]` | `/c` | Redial this tab, or pick which session a new target joins. |
-| `/add <target>` | | Add a device to this session, no dialog. Up to 8 per session. |
-| `/new [target]` | `/n` | Start a fresh session with no devices, or open a new tab on target. |
-| `/clear` | | Start a fresh conversation, keeping this tab's devices. |
+| `/connect [target]` | `/c` | Dial target into this session, or redial. |
+| `/add <target>` | | Add a device to this session. Up to 8 per session. |
+| `/new [target]` | `/n` | Start a fresh session with no devices, then dial target. |
+| `/clear` | | Start a fresh conversation, keeping this session's devices. |
 | `/disconnect [label]` | | Close one device. |
-| `/sessions [--new] <n\|id>` | | List past sessions; resume one here or in a new tab. |
-| `/switch [n\|device]` | `/s` | Pick a tab, or jump to one. |
-| `/close` | | Close this tab; on the last tab, quit. |
+| `/sessions [n\|id]` | | List past sessions; resume one. |
 | `/mcp [list\|add\|remove]` | | Manage MCP servers. See [MCP servers](#mcp-servers). |
 | `/usage` | | Account token and command accounting. |
 | `/copy` | | Copy the agent's last reply as markdown. |
@@ -150,10 +148,8 @@ Defaults; every name is rebindable in `config.json`, see
 | `ctrl+o` | Turn mouse reporting off or on, so the terminal can select text itself. |
 | `pgup` / `pgdown` | Scroll. |
 | `ctrl+l` / `ctrl+end` | Jump to the latest output. While you are scrolled back, the line above the input says so, and with the mouse on, clicking it jumps too. Sending a message also jumps. |
-| `ctrl+left` / `ctrl+right` | Previous / next tab. |
-| `alt+1` … `alt+9` | Jump to tab. |
 | `ctrl+c` twice | Quit. While a mouse selection is on screen, `ctrl+c` copies it instead. |
-| `ctrl+d` twice | Close this tab, or quit on the last one. |
+| `ctrl+d` twice | Quit, on an empty input. |
 
 Dragging over the transcript selects text and copies it on release; a double
 click takes a word and a triple click a row. `ctrl+c` copies the selection
