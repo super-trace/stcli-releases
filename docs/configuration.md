@@ -119,7 +119,7 @@ configurable.
 | `colors` | Overrides a palette role with `#rrggbb` or an ANSI 256 index. Roles: `accent`, `muted`, `faint`, `warn`, `danger`, `ok`, `ink`. |
 | `high_contrast` | Lifts dim text to readable levels, thickens borders, underlines the active tab. |
 | `reduced_motion` | Replaces the thinking spinner with a static mark. |
-| `ascii` | Replaces box drawing, half-block caps and the spinner with ASCII; markdown renders in the `ascii` style. |
+| `ascii` | Replaces box drawing, half-block caps and the spinner with ASCII; markdown renders in the `ascii` style. On by default when `TERM` is `linux` or a VT terminal (`vt100`, `vt220`), whose fonts lack those symbols; `false` turns it off there too. |
 | `mouse` | `false` starts with mouse reporting off, so the terminal selects text and the wheel does not scroll the transcript. Default `true`; `ctrl+o` switches it while running. |
 | `copy_on_select` | `false` makes a mouse selection only highlight; `ctrl+c` or `ctrl+y` copies it. Default `true`. |
 | `syntax` | `false` turns syntax highlighting off. Default `true`. |
