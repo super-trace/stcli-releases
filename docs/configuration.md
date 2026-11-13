@@ -25,9 +25,8 @@ The on/off settings and the theme can also be changed from inside stcli with
     }
   },
   "keys": {
-    "prev_tab": ["ctrl+pgup"],
-    "next_tab": ["ctrl+pgdown"],
-    "jump_tab": ["ctrl+1", "ctrl+2", "ctrl+3"]
+    "page_up": ["ctrl+b"],
+    "scroll_bottom": ["ctrl+g"]
   },
   "ui": {
     "theme": "auto",
@@ -108,8 +107,6 @@ configurable.
 | `scroll_bottom` | `ctrl+l`, `ctrl+end` |
 | `history_prev` / `history_next` | `up` / `down` |
 | `quit` / `quit_eof` | `ctrl+c` / `ctrl+d` |
-| `prev_tab` / `next_tab` | `ctrl+left` / `ctrl+right` |
-| `jump_tab` | `alt+1` … `alt+9`; list position is the tab number |
 
 ## `ui`
 
@@ -117,7 +114,7 @@ configurable.
 | --- | --- |
 | `theme` | `auto` follows the terminal background (default); `dark`; `light`; `mono` uses no colour, bold and reverse video carry meaning. |
 | `colors` | Overrides a palette role with `#rrggbb` or an ANSI 256 index. Roles: `accent`, `muted`, `faint`, `warn`, `danger`, `ok`, `ink`. |
-| `high_contrast` | Lifts dim text to readable levels, thickens borders, underlines the active tab. |
+| `high_contrast` | Lifts dim text to readable levels, thickens borders, underlines the picker cursor. |
 | `reduced_motion` | Replaces the thinking spinner with a static mark. |
 | `ascii` | Replaces box drawing, half-block caps and the spinner with ASCII; markdown renders in the `ascii` style. |
 | `mouse` | `false` starts with mouse reporting off, so the terminal selects text and the wheel does not scroll the transcript. Default `true`; `ctrl+o` switches it while running. |
@@ -139,8 +136,10 @@ rests on colour alone.
 `HostName`, `Port`, `User`, `IdentityFile`, `IdentityAgent`, `ProxyJump`
 (chained), `UserKnownHostsFile`, `HashKnownHosts`, `StrictHostKeyChecking`,
 `Include`, `PubkeyAuthentication`, `PasswordAuthentication`,
-`KbdInteractiveAuthentication`. Resolution follows OpenSSH: first value wins,
-`IdentityFile` and `UserKnownHostsFile` accumulate.
+`KbdInteractiveAuthentication`, `IdentitiesOnly`. Resolution follows OpenSSH:
+first value wins, `IdentityFile` and `UserKnownHostsFile` accumulate. With
+`IdentitiesOnly yes`, an ssh-agent key is offered only when it matches an
+`IdentityFile`.
 
 Any other keyword that could change which host is reached or how it
 authenticates fails the connection and names the keyword, file and line.
