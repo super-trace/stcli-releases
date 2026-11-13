@@ -45,7 +45,8 @@ tab closed untouched leaves no session behind.
 | --- | --- | --- |
 | `/connect [target]` | `/c` | Redial this tab, or pick which session a new target joins. |
 | `/add <target>` | | Add a device to this session, no dialog. Up to 8 per session. |
-| `/new [target]` | `/n` | Start a fresh session, or open a new tab on target. |
+| `/new [target]` | `/n` | Start a fresh session with no devices, or open a new tab on target. |
+| `/clear` | | Start a fresh conversation, keeping this tab's devices. |
 | `/disconnect [label]` | | Close one device. |
 | `/sessions [--new] <n\|id>` | | List past sessions; resume one here or in a new tab. |
 | `/switch [n\|device]` | `/s` | Pick a tab, or jump to one. |
