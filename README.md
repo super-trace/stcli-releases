@@ -178,8 +178,11 @@ credentials and the config file.
 
 ## License
 
-stcli is proprietary software; see [LICENSE.md](LICENSE.md). The open-source
-components it links are listed with their licenses in each release.
+stcli is proprietary software. Use is subject to the
+[Supertrace Terms of Service](https://supertrace.ai/legal/terms), including
+[Section 19 (stcli software)](https://supertrace.ai/legal/terms#19-stcli-software);
+see [LICENSE.md](LICENSE.md). The open-source components it links are listed
+with their licenses in each release.
 
 ## Support
 
