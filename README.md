@@ -133,6 +133,10 @@ shows the same.
 | unknown | Same, plus `r` to remember it as read-only in `config.json`. |
 | destructive | Type the confirmation phrase shown, then `enter`. |
 
+On Linux and SONiC, `sudo -l` and `sudo` running a fixed-form read (`ls`,
+`ss`, `sshd -T`, `passwd -S`, `crontab -l`) count as read-only; other `sudo`
+commands, `sudo cat` and `sudo grep` included, ask.
+
 An unanswered prompt times out after five minutes and the agent is told the
 command did not run. A `!` command skips the dialog, but a destructive one
 still asks for the phrase. Reading, listing or editing a file on your machine,
