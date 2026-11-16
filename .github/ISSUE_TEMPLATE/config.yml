@@ -6,3 +6,6 @@ contact_links:
   - name: Question
     url: https://github.com/super-trace/stcli-releases/discussions/categories/q-a
     about: How to do something with stcli. Ask in Q&A.
+  - name: Email
+    url: mailto:hello@supertrace.ai
+    about: Account, billing, or anything that shouldn't be public.
