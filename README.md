@@ -3,7 +3,7 @@
 Operate network equipment in plain English, from your terminal, over your own
 SSH session. Ask a question, approve the commands, read the answer.
 
-![stcli finds an idle BGP peer behind a disabled interface, then stages the fix on the Junos device and shows its diff for approval](docs/assets/stcli.png)
+![stcli checks a downed Junos interface, then stages the fix and shows the device diff for approval](docs/assets/stcli.png)
 
 A backend agent turns intent into commands for the connected platform. stcli
 runs them locally, shows every one, and stops for a human before anything
