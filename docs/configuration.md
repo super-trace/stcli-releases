@@ -19,10 +19,13 @@ The on/off settings and the theme can also be changed from inside stcli with
     "deny":  ["show running-config | include password"]
   },
   "mcp": {
-    "netbox": {
-      "url": "https://netbox.example.com/mcp",
-      "headers": {"Authorization": "Token …"}
+    "tickets": {
+      "url": "https://mcp.example.com/mcp",
+      "headers": {"Authorization": "Bearer …"}
     }
+  },
+  "netbox": {
+    "url": "https://netbox.example.com"
   },
   "keys": {
     "page_up": ["ctrl+b"],
@@ -48,11 +51,13 @@ The on/off settings and the theme can also be changed from inside stcli with
 
 ## `hosts`
 
-Keyed by the host as you type it or by the address dialled, case-insensitive.
+Keyed by the host as you type it or by the address dialed, case-insensitive.
 `legacy_algorithms: true` enables obsolete SSH crypto (`ssh-rsa`, SHA-1 key
-exchange, CBC ciphers) for that host only. stcli never retries with weaker
-crypto after a failed handshake, and the TUI warns once per connection when
-this is on.
+exchange, CBC ciphers) for that host only. An `~/.ssh/config` line that adds an
+obsolete algorithm to the host's block does the same (see [Old gear](#old-gear)).
+stcli never retries with weaker crypto after a failed handshake. The TUI warns
+once per connection, naming the obsolete algorithms the device actually
+negotiated; a host that opted in but negotiates strong crypto gets no warning.
 
 ## `commands`
 
@@ -63,7 +68,7 @@ such as `sudo` covers every command starting with it.
 
 | List | Effect |
 | --- | --- |
-| `allow` | Read-only, runs without approval. Lifts only a command the built-in tables do not recognise, or a bare write verb narrowed by more words (`commit check`). It never beats a destructive pattern, a write pattern, or an output escape such as `> file`; an entry that could never apply is rejected at startup. |
+| `allow` | Read-only, runs without approval. Lifts only a command the built-in tables do not recognize, or a bare write verb narrowed by more words (`commit check`). It never beats a destructive pattern, a write pattern, or an output escape such as `> file`; an entry that could never apply is rejected at startup. |
 | `ask` | Needs approval even though the built-in tables call it read-only. |
 | `deny` | Never runs, from the agent or from `!`, and opens no dialog. |
 
@@ -84,6 +89,14 @@ restrict it yourself before adding a header: `chmod 600 ~/.config/stcli/config.j
 on macOS and Linux, or remove other users from the file's permissions in its
 Properties dialog on Windows. `/mcp add` and `/mcp remove` edit this block for
 you; see [reference.md](reference.md#mcp-servers).
+
+## `netbox`
+
+Your NetBox: `url` is required and must be `http` or `https`. `token` is the
+API token, kept here only when you connect with `/netbox connect --save`;
+otherwise stcli asks for it each time. The same `chmod 600` advice as for `mcp`
+applies. `/netbox connect` and `/netbox disconnect` edit this block for you; see
+[reference.md](reference.md#netbox).
 
 ## `keys`
 
@@ -112,11 +125,11 @@ configurable.
 
 | Key | Description |
 | --- | --- |
-| `theme` | `auto` follows the terminal background (default); `dark`; `light`; `mono` uses no colour, bold and reverse video carry meaning. |
+| `theme` | `auto` follows the terminal background (default), or is `mono` when `NO_COLOR` is set; `dark`; `light`; `mono` uses no color, bold and reverse video carry meaning. On a 16-color terminal (`TERM=xterm`, PuTTY's default) the palette uses the 16 ANSI colors. |
 | `colors` | Overrides a palette role with `#rrggbb` or an ANSI 256 index. Roles: `accent`, `muted`, `faint`, `warn`, `danger`, `ok`, `ink`. |
 | `high_contrast` | Lifts dim text to readable levels, thickens borders, underlines the picker cursor. |
 | `reduced_motion` | Replaces the thinking spinner with a static mark. |
-| `ascii` | Replaces box drawing, half-block caps and the spinner with ASCII; markdown renders in the `ascii` style. |
+| `ascii` | Draws stcli's own screen in ASCII: box drawing, half-block caps, the spinner, arrows, separators and ellipses; markdown renders in the `ascii` style. Commands, device output and the agent's text are shown as they are. On by default when `TERM` is `linux` or a VT terminal (`vt100`, `vt220`), whose fonts lack those symbols; `false` turns it off there too. |
 | `mouse` | `false` starts with mouse reporting off, so the terminal selects text and the wheel does not scroll the transcript. Default `true`; `ctrl+o` switches it while running. |
 | `copy_on_select` | `false` makes a mouse selection only highlight; `ctrl+c` or `ctrl+y` copies it. Default `true`. |
 | `syntax` | `false` turns syntax highlighting off. Default `true`. |
@@ -125,26 +138,63 @@ configurable.
 stcli highlights code in the `dark` and `light` themes: code blocks in the
 agent's replies, and command output or files whose format it can tell, such as
 JSON, YAML, XML and scripts. Diffs show added and removed lines in the `ok` and
-`danger` colours. `"syntax": false`, `mono` and `ascii` turn highlighting off.
+`danger` colors. `"syntax": false`, `mono` and `ascii` turn highlighting off.
 
 Command badges and block states are always spelled out in words, so no meaning
-rests on colour alone.
+rests on color alone.
 
 ## SSH configuration
 
-`~/.ssh/config` is honoured for: `Host` (with `*`, `?` and `!` negation),
+`~/.ssh/config` is honored for: `Host` (with `*`, `?` and `!` negation),
 `HostName`, `Port`, `User`, `IdentityFile`, `IdentityAgent`, `ProxyJump`
 (chained), `UserKnownHostsFile`, `HashKnownHosts`, `StrictHostKeyChecking`,
 `Include`, `PubkeyAuthentication`, `PasswordAuthentication`,
-`KbdInteractiveAuthentication`, `IdentitiesOnly`. Resolution follows OpenSSH:
-first value wins, `IdentityFile` and `UserKnownHostsFile` accumulate. With
-`IdentitiesOnly yes`, an ssh-agent key is offered only when it matches an
-`IdentityFile`.
+`KbdInteractiveAuthentication`, `IdentitiesOnly`, and the algorithm lists
+`KexAlgorithms`, `Ciphers`, `MACs`, `HostKeyAlgorithms` and
+`PubkeyAcceptedAlgorithms`. Resolution follows OpenSSH: first value wins,
+`IdentityFile` and `UserKnownHostsFile` accumulate. With `IdentitiesOnly yes`,
+an ssh-agent key is offered only when it matches an `IdentityFile`.
+`ProxyJump` also takes `ssh://user@host:port`.
 
 Any other keyword that could change which host is reached or how it
 authenticates fails the connection and names the keyword, file and line.
 Cosmetic keywords such as `Compression`, `ConnectTimeout` and `LogLevel` are
 ignored. `ProxyCommand` is not supported; use `ProxyJump`.
+
+### Old gear
+
+The lines you already have for old switches work:
+
+```
+Host old-switch
+  KexAlgorithms +diffie-hellman-group1-sha1
+  HostKeyAlgorithms +ssh-rsa
+  PubkeyAcceptedAlgorithms +ssh-rsa
+```
+
+Any obsolete name in a host's algorithm lists turns on the whole obsolete set
+for that host only, the same as `legacy_algorithms`. stcli still offers strong
+algorithms first. A `-` list is refused, and so is a name stcli cannot speak,
+naming it.
+
+When a device needs the opt-in and the host doesn't have it, the connection
+fails with what the device offered, one line saying how to fix it, and a `Host`
+block you can paste into `~/.ssh/config` as is. `--debug` adds the underlying
+SSH error.
+
+Without that opt-in, an RSA login key signs with SHA-2 only. A device that
+accepts only `ssh-rsa` signatures (most older Cisco IOS) fails the same way,
+with `PubkeyAcceptedAlgorithms +ssh-rsa` in the block, and no login attempt is
+spent on it.
+
+No setting reaches DSA keys (`ssh-dss`), RC4 and MD5, `aes192-cbc` and
+`aes256-cbc`, RSA keys under 1024 bits, or SSH protocol 1. A device that offers
+only these fails with an error naming what it offered and the fix on the
+device, such as `crypto key generate rsa modulus 2048` or `ip ssh version 2`.
+An `IdentityFile` stcli cannot use (DSA, a small RSA key, a PuTTY `.ppk`, a
+`.pub`) is named with the reason.
+
+### Host keys
 
 Host keys are always verified against `~/.ssh/known_hosts`. An unknown key
 shows its fingerprint in the TUI and asks before trusting it. A changed key is
