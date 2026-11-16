@@ -3,25 +3,7 @@
 Operate network equipment in plain English, from your terminal, over your own
 SSH session. Ask a question, approve the commands, read the answer.
 
-```
-❯ why is bgp down on this router?
-
-  show bgp summary                                        read-only
-  show interfaces ge-0/0/2                                read-only
-
-  Peer 10.0.0.2 has been Idle for 4h12m. Its interface,
-  ge-0/0/2, is administratively down.
-
-❯ bring it up
-
-  ┌ Approval needed ──────────────────────────────────────────┐
-  │ ❯ configure; set interfaces ge-0/0/2 enable; commit       │
-  │   re-enable ge-0/0/2 so the BGP peer can reconnect        │
-  │   state-changing · 4m58s left                             │
-  │                                                           │
-  │   y  run once      n  deny                                │
-  └───────────────────────────────────────────────────────────┘
-```
+![stcli checks a downed Junos interface, then stages the fix and shows the device diff for approval](docs/assets/stcli.png)
 
 A backend agent turns intent into commands for the connected platform. stcli
 runs them locally, shows every one, and stops for a human before anything
