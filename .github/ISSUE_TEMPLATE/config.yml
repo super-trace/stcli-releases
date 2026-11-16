@@ -4,8 +4,5 @@ contact_links:
     url: https://github.com/super-trace/stcli-releases/security/advisories/new
     about: A command ran without asking, or credentials left your machine. Report privately.
   - name: Question
-    url: https://github.com/super-trace/stcli-releases/discussions/categories/q-a
-    about: How to do something with stcli. Ask in Q&A.
-  - name: Email
     url: https://github.com/super-trace/stcli-releases#support
-    about: hello@supertrace.ai for account, billing, or anything that shouldn't be public.
+    about: Email hello@supertrace.ai with questions, account, or billing.
