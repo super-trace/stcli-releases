@@ -60,6 +60,7 @@ if ((Get-FileHash stcli_2026.11.06_windows_amd64.zip).Hash -ieq $expected) {
 | `stcli_<version>_darwin_universal.tar.gz` | Intel + Apple Silicon executable |
 | `stcli_<version>_linux_amd64.tar.gz` | Linux/WSL x86-64 executable |
 | `stcli_<version>_linux_arm64.tar.gz` | Linux/WSL ARM64 executable |
+| `stcli_<version>_linux_armv7.tar.gz` | Linux 32-bit ARM executable: a Raspberry Pi 2 or later on a 32-bit OS |
 | `stcli_<version>_windows_amd64.zip` | Windows x86-64 `stcli.exe` |
 | `stcli_<version>_windows_arm64.zip` | Windows ARM64 `stcli.exe` |
 

@@ -25,7 +25,11 @@ def fixture_target():
         return 'windows_' + ('arm64' if platform.machine().upper() == 'ARM64' else 'amd64')
     system = subprocess.check_output(['uname', '-s'], text=True).strip()
     machine = subprocess.check_output(['uname', '-m'], text=True).strip()
-    return 'darwin_universal' if system == 'Darwin' else 'linux_' + ('arm64' if machine in ['arm64', 'aarch64'] else 'amd64')
+    if system == 'Darwin':
+        return 'darwin_universal'
+    if machine in ['armv7l', 'armv7', 'armv8l']:
+        return 'linux_armv7'
+    return 'linux_' + ('arm64' if machine in ['arm64', 'aarch64'] else 'amd64')
 
 
 def write_fixture(archive):
