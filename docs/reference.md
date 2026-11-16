@@ -51,7 +51,7 @@ runs one session; run another stcli for a second.
 | `/disconnect [label]` | | Close one device. |
 | `/sessions [n\|id]` | | List past sessions and resume one. |
 | `/mcp [list\|add\|remove]` | | Manage MCP servers. See [MCP servers](#mcp-servers). |
-| `/usage` | `/credits` | Credits remaining, then token and command accounting. |
+| `/usage` | `/credits` | Credits remaining, your spend and input / output tokens over the last 30 days, and links to top up and to the usage page. |
 | `/copy` | | Copy the agent's last reply as markdown. |
 | `/config [key=value]` | | Open the settings dialog, or change one setting. See [Settings](#settings). |
 | `/feedback <message>` | | Send feedback about stcli to the team, with your stcli version and session. |
