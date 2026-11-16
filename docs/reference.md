@@ -168,7 +168,7 @@ Defaults; every name is rebindable in `config.json`, see
 | `tab` | In a configuration-block dialog, switch between the Config and Diff tabs; `up` / `down` and `pgup` / `pgdown` scroll it. |
 | `up` / `down` | Input history, from the input's first or last line. `up` on an empty input pulls back the last queued message. |
 | `ctrl+up` / `ctrl+down` | Select the previous / next command block. |
-| `ctrl+e` | Expand or collapse the selected block. |
+| `ctrl+e` | Expand or collapse the selected block. With no block selected, expand every block, or collapse them all once all are expanded. |
 | `ctrl+y` | Copy the mouse selection while one is on screen; otherwise the selected block, or the most recent one: the command and its full output. |
 | `ctrl+o` | Turn mouse reporting off or on, so the terminal can select text itself. |
 | `pgup` / `pgdown` | Scroll. |
