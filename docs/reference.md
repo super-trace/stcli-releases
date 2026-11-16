@@ -12,6 +12,7 @@ stcli login | logout | version | update
 | Target | Description |
 | --- | --- |
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config` or a bracketed IPv6 literal. |
+| `ssh://user@host[:port]?jump=HOSTS` | SSH through jump hosts, comma-separated `[user@]host[:port]`. This is what `-J` writes, and the session keeps it, so a resume goes through the same jump hosts. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. Options: `?context=`, `?container=`, `?shell=`. |
 
 Every target dials into one session. With none, the TUI opens one unbound
@@ -27,6 +28,7 @@ runs one session; run another stcli for a second.
 | `--resume [ID]` | Resume a session by id or unique prefix, or pick from a list, and reconnect to its device. Takes no target. |
 | `--backend URL` | Backend base URL. Default `https://cli.supertrace.ai`. |
 | `--theme NAME` | `auto`, `dark`, `light` or `mono`. |
+| `-J HOSTS` | Reach each SSH target through these jump hosts, as `ssh -J`. Each host is looked up in `~/.ssh/config`, and the list replaces the target's own `ProxyJump`. Not with `--resume` or a pod target. |
 | `--debug` | Error detail in the TUI, plus `stcli-debug.log` in the working directory. |
 
 ## Environment
@@ -34,7 +36,8 @@ runs one session; run another stcli for a second.
 | Variable | Description |
 | --- | --- |
 | `STCLI_TOKEN` | Bearer token instead of the credential store. CI and lab backends. |
-| `STCLI_DEBUG` / `STCLI_THEME` | Same as the flags. `NO_COLOR` and `GLAMOUR_STYLE` are honoured too. |
+| `STCLI_DEBUG` / `STCLI_THEME` | Same as the flags. `GLAMOUR_STYLE` is honored too. |
+| `NO_COLOR` | Set to anything to make the `auto` theme `mono`. An explicit theme still wins. |
 | `STCLI_NO_AUTO_UPDATE` | Set to anything to stop background updates. |
 | `STCLI_SSH_PASSWORD` | Answer SSH password prompts with this value. Lab use only; passphrases still prompt. |
 | `STCLI_SKIP_SSH_CONFIG` | Set to anything to ignore `~/.ssh/config`. |
@@ -51,12 +54,17 @@ runs one session; run another stcli for a second.
 | `/disconnect [label]` | | Close one device. |
 | `/sessions [n\|id]` | | List past sessions and resume one. |
 | `/mcp [list\|add\|remove]` | | Manage MCP servers. See [MCP servers](#mcp-servers). |
+| `/netbox [connect\|disconnect]` | | Show, connect or disconnect NetBox. See [NetBox](#netbox). |
+| `/skills` | | List your saved skills: `enter` shows one, `d` deletes it after a `y`. |
 | `/usage` | `/credits` | Credits remaining, your spend and input / output tokens over the last 30 days, and links to top up and to the usage page. |
 | `/copy` | | Copy the agent's last reply as markdown. |
 | `/config [key=value]` | | Open the settings dialog, or change one setting. See [Settings](#settings). |
 | `/feedback <message>` | | Send feedback about stcli to the team, with your stcli version and session. |
 | `/help` | `/h`, `/?` | Commands and keys. |
 | `/quit` | `/q`, `/exit` | Leave. |
+
+`/connect`, `/add` and `/new` take `-J HOSTS <target>` to go through jump hosts,
+as the `-J` flag does.
 
 `!cmd` runs the rest of the line verbatim on the device, with no agent turn.
 With several devices in the session, name one: `!<label> cmd`. The command and
@@ -84,7 +92,7 @@ and saves it at once, and `esc` closes the dialog and says what changed.
 | `auto_update` | `on`, `off` | When stcli restarts |
 
 Changes are saved to `config.json`, next to whatever else it holds. Key
-bindings, colours, hosts, command rules and MCP servers are not in `/config`;
+bindings, colors, hosts, command rules and MCP servers are not in `/config`;
 edit them in the file as [configuration.md](configuration.md) describes. A
 change you make to the file by hand takes effect when stcli restarts.
 
@@ -130,6 +138,21 @@ advertised to the agent.
 
 Changes take effect at once when the agent is idle, or when its current turn
 ends.
+
+## NetBox
+
+Connect your NetBox and the agent can read it and propose changes.
+
+| Command | Description |
+| --- | --- |
+| `/netbox` | Show the NetBox URL and whether it is connected. |
+| `/netbox connect [url] [--save]` | Ask for the API token with a masked prompt, check it, and connect. Without a URL, the saved one or a prompt. |
+| `/netbox disconnect` | Disconnect and remove NetBox from `config.json`. |
+
+The URL is saved to `config.json`; the token stays in memory unless you pass
+`--save`. Reads run without asking. A change arrives as one changeset: stcli
+looks up the objects it touches, a dialog shows the creates, updates and
+deletes, and nothing is written until you press `y`.
 
 ## Keys
 

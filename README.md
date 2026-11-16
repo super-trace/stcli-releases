@@ -3,25 +3,7 @@
 Operate network equipment in plain English, from your terminal, over your own
 SSH session. Ask a question, approve the commands, read the answer.
 
-```
-❯ why is bgp down on this router?
-
-  show bgp summary                                        read-only
-  show interfaces ge-0/0/2                                read-only
-
-  Peer 10.0.0.2 has been Idle for 4h12m. Its interface,
-  ge-0/0/2, is administratively down.
-
-❯ bring it up
-
-  ┌ Approval needed ──────────────────────────────────────────┐
-  │ ❯ configure; set interfaces ge-0/0/2 enable; commit       │
-  │   re-enable ge-0/0/2 so the BGP peer can reconnect        │
-  │   state-changing · 4m58s left                             │
-  │                                                           │
-  │   y  run once      n  deny                                │
-  └───────────────────────────────────────────────────────────┘
-```
+![stcli checks a downed Junos interface, then stages the fix and shows the device diff for approval](docs/assets/stcli.png)
 
 A backend agent turns intent into commands for the connected platform. stcli
 runs them locally, shows every one, and stops for a human before anything
@@ -36,9 +18,13 @@ changes.
   but does not reach the gate. Unknown commands are treated as writes.
 - **Credentials stay local.** SSH keys, agents and passwords never leave your
   machine. The backend sees command output, not secrets.
+- **Obsolete SSH crypto is opt-in, per host.** SHA-1, CBC ciphers and `ssh-rsa`,
+  including an RSA login key signing with SHA-1, stay off unless you turn them on
+  for that host. stcli never falls back to weaker crypto after a failed handshake.
+  See [Old gear](docs/configuration.md#old-gear).
 
 Platforms with their own rule tables: Junos, Cisco IOS-XE, Cisco NX-OS, Arista
-EOS, Nokia SR Linux, Ciena SAOS 10, and Linux. Anything else runs under the
+EOS, Nokia SR Linux, Ciena SAOS 10, SONiC, and Linux. Anything else runs under the
 strictest table.
 
 ## Install
@@ -108,6 +94,7 @@ stcli login | logout | version | update
 | Target | Description |
 | --- | --- |
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config`. |
+| `ssh://user@host?jump=bastion` | SSH through a jump host. `stcli -J bastion user@host` writes it. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. |
 
 Every target dials into one session; run another stcli for a second session.
@@ -130,8 +117,12 @@ shows the same.
 | --- | --- |
 | read-only | Runs immediately. |
 | needs approval | `y` runs once, `n` denies. |
-| unknown | Same, plus `r` to remember it as read-only in `config.json`, or `t` to run it and let further unrecognised read-like commands run unasked until the turn ends. A command with `>`, `tee`, `rm`, `mv`, `cp`, `dd`, `sudo` or a package manager still asks. |
+| unknown | Same, plus `r` to remember it as read-only in `config.json`, or `t` to run it and let further unrecognized read-like commands run unasked until the turn ends. A command with `>`, `tee`, `rm`, `mv`, `cp`, `dd`, `sudo` or a package manager still asks. |
 | destructive | Type the confirmation phrase shown, then `enter`. |
+
+On Linux and SONiC, `sudo -l` and `sudo` running a fixed-form read (`ls`,
+`ss`, `sshd -T`, `passwd -S`, `crontab -l`) count as read-only; other `sudo`
+commands, `sudo cat` and `sudo grep` included, ask.
 
 An unanswered prompt times out after five minutes and the agent is told the
 command did not run. A `!` command skips the dialog, but a destructive one
@@ -158,8 +149,8 @@ Junos and Nokia SR Linux; other platforms keep the one-command dialog.
 ## Configuration
 
 `~/.config/stcli/config.json` holds per-host SSH opt-ins, your own
-allow/ask/deny command rules, MCP servers, key bindings, theme and
-accessibility settings, and the auto-update switch. `~/.ssh/config` is honoured
+allow/ask/deny command rules, MCP servers, NetBox, key bindings, theme and
+accessibility settings, and the auto-update switch. `~/.ssh/config` is honored
 for a documented subset. Both are in [docs/configuration.md](docs/configuration.md).
 
 ## Tricks
@@ -180,7 +171,7 @@ for a documented subset. Both are in [docs/configuration.md](docs/configuration.
 ## Releases and verification
 
 Releases are tagged by UTC date, `vYYYY.MM.DD`, with `.2`, `.3` for further
-releases that day. Each ships five archives, `checksums.txt`,
+releases that day. Each ships six archives, `checksums.txt`,
 `provenance.json`, which records the source commit and toolchain, and
 `THIRD_PARTY_NOTICES.md`, the licenses of the open-source modules linked in.
 The releases page is the changelog.
@@ -188,7 +179,7 @@ The releases page is the changelog.
 | Platform | Package | Signing |
 | --- | --- | --- |
 | macOS | universal, Intel and Apple Silicon | ad-hoc signed, not notarized |
-| Linux, WSL | amd64, arm64 | unsigned |
+| Linux, WSL | amd64, arm64, armv7 (32-bit: Raspberry Pi 2 or later) | unsigned |
 | Windows | amd64, arm64 | unsigned; SmartScreen may warn on first run |
 
 The installer verifies the SHA-256 before replacing anything. Checksums catch
@@ -226,4 +217,8 @@ with their licenses in each release.
 
 Problems with installation, packages, or the tool itself: open an issue in
 this repository. Run with `--debug` and attach `stcli-debug.log` from the
-working directory.
+working directory, with hostnames, addresses, and secrets redacted.
+
+Security issues, such as a state-changing command that ran without asking:
+[report them privately](https://github.com/super-trace/stcli-releases/security/advisories/new),
+not as an issue.

@@ -1,0 +1,60 @@
+name: Wrong approval
+description: stcli asked to approve a read-only command, or a confirmation step was wrong.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A state-changing command that ran without asking is a security issue:
+        [report it privately](https://github.com/super-trace/stcli-releases/security/advisories/new).
+  - type: textarea
+    id: version
+    attributes:
+      label: stcli version
+      description: Output of `stcli version`.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Device platform
+      options:
+        - Junos
+        - Cisco IOS-XE
+        - Cisco NX-OS
+        - Arista EOS
+        - Nokia SR Linux
+        - Ciena SAOS 10
+        - SONiC
+        - Linux
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: The exact command, redacted if needed.
+      placeholder: show interfaces terse | match ge-
+    validations:
+      required: true
+  - type: dropdown
+    id: got
+    attributes:
+      label: What stcli did
+      options: [Ran it, Asked for approval, Asked for a typed confirmation, Refused it]
+    validations:
+      required: true
+  - type: dropdown
+    id: want
+    attributes:
+      label: What it should have done
+      options: [Run it, Ask for approval, Ask for a typed confirmation, Refuse it]
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: Anything that explains the expected behavior, such as a vendor doc link.
