@@ -215,7 +215,8 @@ with their licenses in each release.
 
 ## Support
 
-Questions: ask in [Q&A](https://github.com/super-trace/stcli-releases/discussions/categories/q-a).
+Questions: ask in [Q&A](https://github.com/super-trace/stcli-releases/discussions/categories/q-a), or email
+[hello@supertrace.ai](mailto:hello@supertrace.ai) for anything private.
 
 Problems with installation, packages, or the tool itself: open an issue in
 this repository. Run with `--debug` and attach `stcli-debug.log` from the
