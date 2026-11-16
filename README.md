@@ -217,4 +217,8 @@ with their licenses in each release.
 
 Problems with installation, packages, or the tool itself: open an issue in
 this repository. Run with `--debug` and attach `stcli-debug.log` from the
-working directory.
+working directory, with hostnames, addresses, and secrets redacted.
+
+Security issues, such as a state-changing command that ran without asking:
+[report them privately](https://github.com/super-trace/stcli-releases/security/advisories/new),
+not as an issue.
