@@ -167,7 +167,7 @@ Defaults; every name is rebindable in `config.json`, see
 | `esc` | Interrupt the turn; cancel a dialog. |
 | `tab` | In a configuration-block dialog, switch between the Config and Diff tabs; `up` / `down` and `pgup` / `pgdown` scroll it. |
 | `up` / `down` | Input history, from the input's first or last line. `up` on an empty input pulls back the last queued message. |
-| `ctrl+up` / `ctrl+down` | Select the previous / next command block. |
+| `alt+up` / `alt+down` | Select the previous / next command block. On a Mac, that's `option+↑` / `option+↓`. `ctrl+up` / `ctrl+down` also work where the OS doesn't take them (macOS uses them for Mission Control). |
 | `ctrl+e` | Expand or collapse the selected block, or the newest long block when none is selected. |
 | `ctrl+o` | Expand every long block, or collapse them all once all are expanded. |
 | `ctrl+y` | Copy the mouse selection while one is on screen; otherwise the selected block, or the most recent one: the command and its full output. |

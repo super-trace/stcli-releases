@@ -112,7 +112,7 @@ configurable.
 | `newline` | `alt+enter`, `ctrl+j` |
 | `send_now` | `ctrl+enter` |
 | `interrupt` | `esc` |
-| `prev_block` / `next_block` | `ctrl+up` / `ctrl+down` |
+| `prev_block` / `next_block` | `alt+up`, `ctrl+up` / `alt+down`, `ctrl+down` |
 | `toggle_block` | `ctrl+e` |
 | `toggle_all` | `ctrl+o` |
 | `copy` | `ctrl+y` |
