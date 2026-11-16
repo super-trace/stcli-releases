@@ -19,5 +19,5 @@ not as a public issue.
 
 ## Supported versions
 
-Only the latest release. stcli updates itself unless `STCLI_NO_AUTO_UPDATE=1`
+Only the latest release. stcli updates itself unless `STCLI_NO_AUTO_UPDATE`
 is set.
