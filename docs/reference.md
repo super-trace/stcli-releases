@@ -177,6 +177,9 @@ Defaults; every name is rebindable in `config.json`, see
 | `ctrl+c` twice | Quit. While a mouse selection is on screen, `ctrl+c` copies it instead. |
 | `ctrl+d` twice | Quit, on an empty input. |
 
+Clicking the `ctrl+e to expand` or `ctrl+e to collapse` note under a long
+block toggles that block.
+
 Dragging over the transcript selects text and copies it on release; a double
 click takes a word and a triple click a row. `ctrl+c` copies the selection
 again and releases it, and so does `cmd+c` in a terminal that passes it on;
