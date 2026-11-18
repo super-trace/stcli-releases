@@ -26,9 +26,16 @@ fail() {
 detect_platform() {
   OS=$(uname -s | tr '[:upper:]' '[:lower:]')
   ARCH=$(uname -m)
+  [ "$(uname -o 2>/dev/null)" = "Android" ] && OS="android"
 
   case "$OS" in
     darwin) ARCH_LABEL="universal" ;;
+    android)
+      case "$ARCH" in
+        arm64|aarch64) ARCH_LABEL="arm64" ;;
+        *) fail "unsupported architecture: $ARCH" "Android needs a 64-bit ARM phone." ;;
+      esac
+      ;;
     linux)
       case "$ARCH" in
         x86_64|amd64) ARCH_LABEL="amd64" ;;
@@ -38,7 +45,7 @@ detect_platform() {
         *) fail "unsupported architecture: $ARCH" "Supported: x86_64, arm64, armv7." ;;
       esac
       ;;
-    *) fail "unsupported operating system: $OS" "Supported: macOS, Linux, WSL. For Windows, use install.ps1." ;;
+    *) fail "unsupported operating system: $OS" "Supported: macOS, Linux, WSL, Android (Termux). For Windows, use install.ps1." ;;
   esac
 
   echo "Detected: $OS $ARCH"

@@ -29,7 +29,7 @@ strictest table.
 
 ## Install
 
-macOS, Linux, or WSL:
+macOS, Linux, WSL, or Android in [Termux](https://termux.dev):
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh | sh
@@ -66,8 +66,8 @@ Needs a real terminal, SSH reach to your devices, and HTTPS to
 `cli.supertrace.ai`. stcli draws in a window of any size. An approval or other
 dialog needs at least 70 columns by 13 rows: in a smaller window it is replaced
 by a notice, and only `esc`, which declines it, or `ctrl+c` works until the
-window grows, so no key can approve something you cannot see. Pinning a version or directory, and offline verification,
-are in [docs/install.md](docs/install.md).
+window grows, so no key can approve something you cannot see. Pinning a version or directory, offline verification,
+and Android setup are in [docs/install.md](docs/install.md).
 
 ## First run
 
@@ -181,6 +181,7 @@ The releases page is the changelog.
 | macOS | universal, Intel and Apple Silicon | ad-hoc signed, not notarized |
 | Linux, WSL | amd64, arm64, armv7 (32-bit: Raspberry Pi 2 or later) | unsigned |
 | Windows | amd64, arm64 | unsigned; SmartScreen may warn on first run |
+| Android (Termux) | arm64 | unsigned |
 
 The installer verifies the SHA-256 before replacing anything. Checksums catch
 corrupt downloads; they are not a publisher signature. To verify by hand:
