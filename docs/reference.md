@@ -91,6 +91,7 @@ and saves it at once, and `esc` closes the dialog and says what changed.
 | `ui.high_contrast`, `ui.reduced_motion` | `off`, `on` | At once |
 | `ui.ascii`, `ui.screen_reader` | `off`, `on` | When stcli restarts |
 | `auto_update` | `on`, `off` | When stcli restarts |
+| `crash_reports` | `ask`, `always`, `off` | When stcli restarts |
 
 Changes are saved to `config.json`, next to whatever else it holds. Key
 bindings, colors, hosts, command rules and MCP servers are not in `/config`;

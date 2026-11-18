@@ -23,7 +23,8 @@ changes.
   for that host. stcli never falls back to weaker crypto after a failed handshake.
   See [Old gear](docs/configuration.md#old-gear).
 - **Crash reports ask first and carry no personal data.** When stcli crashes it
-  asks before sending a report, right away or on the next launch. A report holds
+  restarts into the same session and asks in a dialog before sending a report;
+  a crash it cannot recover from is offered on the next launch. A report holds
   the stack trace, the Go runtime's own error message, the version, OS and
   architecture; never a hostname, command, device output or credential. Set
   `STCLI_NO_CRASH_REPORTS=1` or `DO_NOT_TRACK=1` to turn them off.
