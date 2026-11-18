@@ -121,7 +121,29 @@ with tempfile.TemporaryDirectory(prefix='stcli-install-') as directory:
                 (api / 'latest').unlink()
                 subprocess.run(shell, env=fish, check=True)
                 assert (home / '.config/fish/config.fish').read_text().count(f'set -gx PATH "{bin_dir}" $PATH') == 1
+        if not windows:
+            # A fake uname picks the platform; uname -o fails when FAKE_UNAME_O is empty.
+            fake = root / 'fake-uname'
+            fake.mkdir()
+            (fake / 'uname').write_text('#!/bin/sh\ncase "$1" in\n  -s) echo "$FAKE_UNAME_S" ;;\n  -m) echo "$FAKE_UNAME_M" ;;\n'
+                                        '  -o) [ -n "$FAKE_UNAME_O" ] || exit 1; echo "$FAKE_UNAME_O" ;;\nesac\n')
+            (fake / 'uname').chmod(0o755)
+            for system, machine, os_name, target in [('Linux', 'aarch64', 'Android', 'android_arm64'),
+                                                     ('Linux', 'x86_64', 'GNU/Linux', 'linux_amd64'),
+                                                     ('Linux', 'aarch64', '', 'linux_arm64'),
+                                                     ('Darwin', 'arm64', '', 'darwin_universal'),
+                                                     ('Linux', 'x86_64', 'Android', None)]:
+                case = dict(env, PATH=f'{fake}:/usr/bin:/bin', STCLI_VERSION='test',
+                            FAKE_UNAME_S=system, FAKE_UNAME_M=machine, FAKE_UNAME_O=os_name)
+                executable.unlink(missing_ok=True)
+                if target:
+                    write_fixture(assets / f'stcli_test_{target}.tar.gz')
+                result = subprocess.run(shell, env=case, capture_output=True, text=True)
+                if target:
+                    assert result.returncode == 0 and executable.read_bytes() == payload, (target, result)
+                else:
+                    assert result.returncode and 'Android needs a 64-bit ARM phone' in result.stderr, result
     finally:
         if windows and original: restore_user_path(*original)
     server.shutdown()
-    print(f'{len(shells)} shell(s): install, reinstall, spaces, PATH setup, checksum rejection, download retry, and pinned version passed')
+    print(f'{len(shells)} shell(s): install, reinstall, spaces, PATH setup, checksum rejection, download retry, pinned version, and platform detection passed')

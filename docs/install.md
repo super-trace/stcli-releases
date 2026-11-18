@@ -70,7 +70,8 @@ if ((Get-FileHash stcli_2026.11.06_windows_amd64.zip).Hash -ieq $expected) {
 ## Android
 
 stcli runs in [Termux](https://termux.dev) on 64-bit ARM phones. Install
-Termux from F-Droid or GitHub; the Play Store build is outdated. Then, in
+Termux from F-Droid or GitHub; the Play Store build is experimental, and
+Termux recommends the other two. Then, in
 Termux:
 
 ```sh
