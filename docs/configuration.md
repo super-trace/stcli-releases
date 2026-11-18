@@ -10,6 +10,7 @@ The on/off settings and the theme can also be changed from inside stcli with
 ```json
 {
   "auto_update": true,
+  "crash_reports": "ask",
   "hosts": {
     "edge-01": {"legacy_algorithms": true}
   },
@@ -48,6 +49,12 @@ The on/off settings and the theme can also be changed from inside stcli with
 ## `auto_update`
 
 `false` turns background updates off. `stcli update` still works.
+
+## `crash_reports`
+
+`ask` (the default) offers each crash report in a dialog, `always` sends them
+without asking, and `off` never saves or offers one. Choosing **Always send** in
+the dialog sets `always`.
 
 ## `hosts`
 

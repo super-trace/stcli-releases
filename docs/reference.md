@@ -39,6 +39,7 @@ runs one session; run another stcli for a second.
 | `STCLI_DEBUG` / `STCLI_THEME` | Same as the flags. `GLAMOUR_STYLE` is honored too. |
 | `NO_COLOR` | Set to anything to make the `auto` theme `mono`. An explicit theme still wins. |
 | `STCLI_NO_AUTO_UPDATE` | Set to anything to stop background updates. |
+| `STCLI_NO_CRASH_REPORTS` | Set to anything to turn crash reports off; stcli then never saves or offers one. `DO_NOT_TRACK` does the same. |
 | `STCLI_SSH_PASSWORD` | Answer SSH password prompts with this value. Lab use only; passphrases still prompt. |
 | `STCLI_SKIP_SSH_CONFIG` | Set to anything to ignore `~/.ssh/config`. |
 | `XDG_CONFIG_HOME` | Moves `~/.config/stcli` when set to an absolute path. |
@@ -90,6 +91,7 @@ and saves it at once, and `esc` closes the dialog and says what changed.
 | `ui.high_contrast`, `ui.reduced_motion` | `off`, `on` | At once |
 | `ui.ascii`, `ui.screen_reader` | `off`, `on` | When stcli restarts |
 | `auto_update` | `on`, `off` | When stcli restarts |
+| `crash_reports` | `ask`, `always`, `off` | When stcli restarts |
 
 Changes are saved to `config.json`, next to whatever else it holds. Key
 bindings, colors, hosts, command rules and MCP servers are not in `/config`;
