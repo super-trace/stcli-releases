@@ -22,9 +22,10 @@ changes.
   including an RSA login key signing with SHA-1, stay off unless you turn them on
   for that host. stcli never falls back to weaker crypto after a failed handshake.
   See [Old gear](docs/configuration.md#old-gear).
-- **Crash reports carry code, not data.** When stcli crashes it sends the stack
-  trace, the Go runtime's own error message, the version, OS and architecture.
-  Never a hostname, command, device output or credential. Set
+- **Crash reports ask first and carry no personal data.** When stcli crashes it
+  asks before sending a report, right away or on the next launch. A report holds
+  the stack trace, the Go runtime's own error message, the version, OS and
+  architecture; never a hostname, command, device output or credential. Set
   `STCLI_NO_CRASH_REPORTS=1` or `DO_NOT_TRACK=1` to turn them off.
 
 Platforms with their own rule tables: Junos, Cisco IOS-XE, Cisco NX-OS, Arista
