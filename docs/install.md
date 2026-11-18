@@ -63,5 +63,22 @@ if ((Get-FileHash stcli_2026.11.06_windows_amd64.zip).Hash -ieq $expected) {
 | `stcli_<version>_linux_armv7.tar.gz` | Linux 32-bit ARM executable: a Raspberry Pi 2 or later on a 32-bit OS |
 | `stcli_<version>_windows_amd64.zip` | Windows x86-64 `stcli.exe` |
 | `stcli_<version>_windows_arm64.zip` | Windows ARM64 `stcli.exe` |
+| `stcli_<version>_android_arm64.tar.gz` | Android ARM64 executable for Termux |
 
 `provenance.json` records the source commit and toolchain of every package.
+
+## Android
+
+stcli runs in [Termux](https://termux.dev) on 64-bit ARM phones. Install
+Termux from F-Droid or GitHub; the Play Store build is experimental, and
+Termux recommends the other two. Then, in
+Termux:
+
+```sh
+pkg install curl
+curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh | sh
+```
+
+- Mouse reporting starts off, so a tap raises the keyboard. `ctrl+o` turns it on
+  to scroll by swiping; Termux's extra-keys row has `CTRL`.
+- Local commands run in Termux's userland, not Android's.
