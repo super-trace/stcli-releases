@@ -13,6 +13,7 @@ stcli login | logout | version | update
 | --- | --- |
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config` or a bracketed IPv6 literal. |
 | `ssh://user@host[:port]?jump=HOSTS` | SSH through jump hosts, comma-separated `[user@]host[:port]`. This is what `-J` writes, and the session keeps it, so a resume goes through the same jump hosts. |
+| `ssh://user@host[:port]?identity=PATH` | SSH offering this private key first. This is what `-i` writes, with the path made absolute; combine with `jump=` as `?jump=HOSTS&identity=PATH`. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. Options: `?context=`, `?container=`, `?shell=`. |
 
 Every target dials into one session. With none, the TUI opens one unbound
@@ -29,6 +30,7 @@ runs one session; run another stcli for a second.
 | `--backend URL` | Backend base URL. Default `https://cli.supertrace.ai`. |
 | `--theme NAME` | `auto`, `dark`, `light` or `mono`. |
 | `-J HOSTS` | Reach each SSH target through these jump hosts, as `ssh -J`. Each host is looked up in `~/.ssh/config`, and the list replaces the target's own `ProxyJump`. Not with `--resume` or a pod target. |
+| `-i KEY` | Offer this private key to each SSH target before the ones from `~/.ssh/config`, as `ssh -i`. Not with `--resume` or a pod target. |
 | `--debug` | Error detail in the TUI, plus `stcli-debug.log` in the working directory. |
 
 ## Environment
@@ -63,8 +65,9 @@ runs one session; run another stcli for a second.
 | `/help` | `/h`, `/?` | Commands and keys. |
 | `/quit` | `/q`, `/exit` | Leave. |
 
-`/connect`, `/add` and `/new` take `-J HOSTS <target>` to go through jump hosts,
-as the `-J` flag does.
+`/connect`, `/add` and `/new` take `-J HOSTS` and `-i KEY` before the target, as
+the flags do: `/connect -i key.pem ubuntu@203.0.113.7`. The same works when you ask
+the agent to connect.
 
 `!cmd` runs the rest of the line verbatim on the device, with no agent turn.
 With several devices in the session, name one: `!<label> cmd`. The command and
