@@ -39,6 +39,7 @@ runs one session; run another stcli for a second.
 | `STCLI_DEBUG` / `STCLI_THEME` | Same as the flags. `GLAMOUR_STYLE` is honored too. |
 | `NO_COLOR` | Set to anything to make the `auto` theme `mono`. An explicit theme still wins. |
 | `STCLI_NO_AUTO_UPDATE` | Set to anything to stop background updates. |
+| `STCLI_NO_CRASH_REPORTS` | Set to anything to stop crash reports. `DO_NOT_TRACK` does the same. |
 | `STCLI_SSH_PASSWORD` | Answer SSH password prompts with this value. Lab use only; passphrases still prompt. |
 | `STCLI_SKIP_SSH_CONFIG` | Set to anything to ignore `~/.ssh/config`. |
 | `XDG_CONFIG_HOME` | Moves `~/.config/stcli` when set to an absolute path. |
