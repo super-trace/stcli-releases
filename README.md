@@ -101,6 +101,7 @@ stcli login | logout | version | update
 | --- | --- |
 | `user@host[:port]` | SSH. `host` can be an alias from `~/.ssh/config`. |
 | `ssh://user@host?jump=bastion` | SSH through a jump host. `stcli -J bastion user@host` writes it. |
+| `ssh://user@host?identity=/path/key.pem` | SSH with a key that is not in `~/.ssh/config` or the agent. `stcli -i key.pem user@host` writes it. |
 | `k8s://namespace/pod` | A shell inside a pod through the Kubernetes API. |
 
 Every target dials into one session; run another stcli for a second session.
