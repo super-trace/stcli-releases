@@ -125,7 +125,7 @@ configurable.
 | `high_contrast` | Lifts dim text to readable levels, thickens borders, underlines the picker cursor. |
 | `reduced_motion` | Replaces the thinking spinner with a static mark. |
 | `ascii` | Draws stcli's own screen in ASCII: box drawing, half-block caps, the spinner, arrows, separators and ellipses; markdown renders in the `ascii` style. Commands, device output and the agent's text are shown as they are. On by default when `TERM` is `linux` or a VT terminal (`vt100`, `vt220`), whose fonts lack those symbols; `false` turns it off there too. |
-| `mouse` | `false` starts with mouse reporting off, so the terminal selects text and the wheel does not scroll the transcript. Default `true`; `ctrl+t` switches it while running. |
+| `mouse` | `false` starts with mouse reporting off, so the terminal selects text and the wheel does not scroll the transcript. Default `true`, except on Android, where it is `false` so a tap raises the keyboard; `ctrl+t` switches it while running. |
 | `copy_on_select` | `false` makes a mouse selection only highlight; `ctrl+c` or `ctrl+y` copies it. Default `true`. |
 | `syntax` | `false` turns syntax highlighting off. Default `true`. |
 | `screen_reader` | Drops borders, bubbles and input chrome for text labels (`you:`, `assistant:`, `error:`). Implies `ascii` and `reduced_motion`. |
