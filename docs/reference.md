@@ -171,11 +171,12 @@ Defaults; every name is rebindable in `config.json`, see
 | `ctrl+enter` | Interrupt the running turn and send now. Needs a terminal that reports modified keys (kitty, Ghostty, WezTerm, iTerm2); elsewhere it acts like `enter`. |
 | `esc` | Interrupt the turn; cancel a dialog. |
 | `tab` | In a configuration-block dialog, switch between the Config and Diff tabs; `up` / `down` and `pgup` / `pgdown` scroll it. |
-| `up` / `down` | Input history, from the input's first or last line. `up` on an empty input pulls back the last queued message. |
-| `ctrl+up` / `ctrl+down` | Select the previous / next command block. |
-| `ctrl+e` | Expand or collapse the selected block. |
+| `up` / `down`, `ctrl+p` / `ctrl+n` | Input history, from the input's first or last line. `up` or `ctrl+p` on an empty input pulls back the last queued message. On Android with the mouse off, `up` / `down` on an empty input scroll instead, since Termux sends swipes as arrow keys. |
+| `alt+up` / `alt+down` | Select the previous / next command block (`option` on a Mac). |
+| `ctrl+e` | Expand or collapse the selected block, or the newest long block when none is selected. With the mouse on, clicking the `ctrl+e to expand` or `ctrl+e to collapse` note under a block does the same. |
+| `ctrl+o` | Expand every long block, or collapse them all once all are expanded. |
 | `ctrl+y` | Copy the mouse selection while one is on screen; otherwise the selected block, or the most recent one: the command and its full output. |
-| `ctrl+o` | Turn mouse reporting off or on, so the terminal can select text itself. |
+| `ctrl+t` | Turn mouse reporting off or on, so the terminal can select text itself. |
 | `pgup` / `pgdown` | Scroll. |
 | `ctrl+l` / `ctrl+end` | Jump to the latest output. While you are scrolled back, the line above the input says so, and with the mouse on, clicking it jumps too. Sending a message also jumps. |
 | `ctrl+c` twice | Quit. While a mouse selection is on screen, `ctrl+c` copies it instead. |
@@ -192,10 +193,10 @@ it as a paste buffer and passes it on to your terminal with its default
 settings. Any other tmux between stcli and your terminal, such as one on your
 own machine with stcli over SSH inside it, needs `set-clipboard on`, which lets
 any program in tmux set your clipboard. Where the copy is not
-accepted, press `ctrl+o` and select with the terminal or with tmux.
+accepted, press `ctrl+t` and select with the terminal or with tmux.
 
 A GitHub Codespace opened in the browser does not accept the copy. There the
-line above the input reads `copy may fail in codespace · ctrl+o for native
-select`: press `ctrl+o`, select with the terminal and copy with its own
+line above the input reads `copy may fail in codespace · ctrl+t for native
+select`: press `ctrl+t`, select with the terminal and copy with its own
 shortcut. A Codespace opened in desktop VS Code shows the same line and may
 copy anyway.
