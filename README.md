@@ -18,10 +18,9 @@ changes.
   but does not reach the gate. Unknown commands are treated as writes.
 - **Credentials stay local.** SSH keys, agents and passwords never leave your
   machine. The backend sees command output, not secrets.
-- **Obsolete SSH crypto is opt-in, per host.** SHA-1, CBC ciphers and `ssh-rsa`,
-  including an RSA login key signing with SHA-1, stay off unless you turn them on
-  for that host. stcli never falls back to weaker crypto after a failed handshake.
-  See [Old gear](docs/configuration.md#old-gear).
+- **Old gear just connects.** Strong SSH crypto is always tried first; obsolete
+  algorithms are used only when a device offers nothing else, and stcli tells
+  you which ones it negotiated. See [Old gear](docs/configuration.md#old-gear).
 - **Crash reports ask first and carry no personal data.** When stcli crashes it
   restarts into the same session and asks in a dialog before sending a report;
   a crash it cannot recover from is offered on the next launch. A report holds

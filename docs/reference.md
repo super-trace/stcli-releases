@@ -97,7 +97,7 @@ and saves it at once, and `esc` closes the dialog and says what changed.
 | `crash_reports` | `ask`, `always`, `off` | When stcli restarts |
 
 Changes are saved to `config.json`, next to whatever else it holds. Key
-bindings, colors, hosts, command rules and MCP servers are not in `/config`;
+bindings, colors, command rules and MCP servers are not in `/config`;
 edit them in the file as [configuration.md](configuration.md) describes. A
 change you make to the file by hand takes effect when stcli restarts.
 
