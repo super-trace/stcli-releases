@@ -79,6 +79,7 @@ pkg install curl
 curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/install.sh | sh
 ```
 
-- Mouse reporting starts off, so a tap raises the keyboard. `ctrl+o` turns it on
-  to scroll by swiping; Termux's extra-keys row has `CTRL`.
+- Mouse reporting starts off, so a tap raises the keyboard. Swiping still
+  scrolls the session while the input is empty; `ctrl+p` / `ctrl+n` recall
+  history. `ctrl+t` turns the mouse on; Termux's extra-keys row has `CTRL`.
 - Local commands run in Termux's userland, not Android's.
