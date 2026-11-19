@@ -80,6 +80,6 @@ curl -fsSL https://raw.githubusercontent.com/super-trace/stcli-releases/main/ins
 ```
 
 - Mouse reporting starts off, so a tap raises the keyboard. Swiping still
-  scrolls the session while the input is empty; `ctrl+p` / `ctrl+n` recall
-  history. Termux's extra-keys row has `CTRL`.
+  scrolls the session while the input is empty. Termux's extra-keys row has
+  `CTRL`.
 - Local commands run in Termux's userland, not Android's.

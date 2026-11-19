@@ -125,7 +125,7 @@ configurable.
 | `toggle_mouse` | `ctrl+o` |
 | `page_up` / `page_down` | `pgup` / `pgdown` |
 | `scroll_bottom` | `ctrl+l`, `ctrl+end` |
-| `history_prev` / `history_next` | `up`, `ctrl+p` / `down`, `ctrl+n` |
+| `history_prev` / `history_next` | `up` / `down` |
 | `quit` / `quit_eof` | `ctrl+c` / `ctrl+d` |
 
 ## `ui`
