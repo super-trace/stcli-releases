@@ -11,9 +11,6 @@ The on/off settings and the theme can also be changed from inside stcli with
 {
   "auto_update": true,
   "crash_reports": "ask",
-  "hosts": {
-    "edge-01": {"legacy_algorithms": true}
-  },
   "commands": {
     "allow": ["nv show", "show tech-support"],
     "ask":   ["dmesg"],
@@ -55,16 +52,6 @@ The on/off settings and the theme can also be changed from inside stcli with
 `ask` (the default) offers each crash report in a dialog, `always` sends them
 without asking, and `off` never saves or offers one. Choosing **Always send** in
 the dialog sets `always`.
-
-## `hosts`
-
-Keyed by the host as you type it or by the address dialed, case-insensitive.
-`legacy_algorithms: true` enables obsolete SSH crypto (`ssh-rsa`, SHA-1 key
-exchange, CBC ciphers) for that host only. An `~/.ssh/config` line that adds an
-obsolete algorithm to the host's block does the same (see [Old gear](#old-gear)).
-stcli never retries with weaker crypto after a failed handshake. The TUI warns
-once per connection, naming the obsolete algorithms the device actually
-negotiated; a host that opted in but negotiates strong crypto gets no warning.
 
 ## `commands`
 
@@ -156,45 +143,27 @@ rests on color alone.
 `HostName`, `Port`, `User`, `IdentityFile`, `IdentityAgent`, `ProxyJump`
 (chained), `UserKnownHostsFile`, `HashKnownHosts`, `StrictHostKeyChecking`,
 `Include`, `PubkeyAuthentication`, `PasswordAuthentication`,
-`KbdInteractiveAuthentication`, `IdentitiesOnly`, and the algorithm lists
-`KexAlgorithms`, `Ciphers`, `MACs`, `HostKeyAlgorithms` and
-`PubkeyAcceptedAlgorithms`. Resolution follows OpenSSH: first value wins,
+`KbdInteractiveAuthentication` and `IdentitiesOnly`. Resolution follows OpenSSH: first value wins,
 `IdentityFile` and `UserKnownHostsFile` accumulate. With `IdentitiesOnly yes`,
 an ssh-agent key is offered only when it matches an `IdentityFile`.
 `ProxyJump` also takes `ssh://user@host:port`.
 
 Any other keyword that could change which host is reached or how it
 authenticates fails the connection and names the keyword, file and line.
-Cosmetic keywords such as `Compression`, `ConnectTimeout` and `LogLevel` are
-ignored. `ProxyCommand` is not supported; use `ProxyJump`.
+Cosmetic keywords such as `Compression`, `ConnectTimeout` and `LogLevel`, and
+the algorithm lists (see [Old gear](#old-gear)), are ignored. `ProxyCommand` is not supported; use `ProxyJump`.
 
 ### Old gear
 
-The lines you already have for old switches work:
+Old switches connect with no configuration. stcli offers strong algorithms
+first and obsolete ones (`ssh-rsa`, SHA-1 key exchange such as
+`diffie-hellman-group1-sha1`, CBC ciphers, RC4) after them, so a device that
+speaks anything strong gets it. An RSA login key signs with SHA-1 only for a
+device that accepts nothing else. stcli warns once per connection, naming the
+obsolete algorithms the device actually negotiated. The algorithm lists in
+`~/.ssh/config` are ignored.
 
-```
-Host old-switch
-  KexAlgorithms +diffie-hellman-group1-sha1
-  HostKeyAlgorithms +ssh-rsa
-  PubkeyAcceptedAlgorithms +ssh-rsa
-```
-
-Any obsolete name in a host's algorithm lists turns on the whole obsolete set
-for that host only, the same as `legacy_algorithms`. stcli still offers strong
-algorithms first. A `-` list is refused, and so is a name stcli cannot speak,
-naming it.
-
-When a device needs the opt-in and the host doesn't have it, the connection
-fails with what the device offered, one line saying how to fix it, and a `Host`
-block you can paste into `~/.ssh/config` as is. `--debug` adds the underlying
-SSH error.
-
-Without that opt-in, an RSA login key signs with SHA-2 only. A device that
-accepts only `ssh-rsa` signatures (most older Cisco IOS) fails the same way,
-with `PubkeyAcceptedAlgorithms +ssh-rsa` in the block, and no login attempt is
-spent on it.
-
-No setting reaches DSA keys (`ssh-dss`), RC4 and MD5, `aes192-cbc` and
+stcli cannot speak DSA keys (`ssh-dss`), MD5, `aes192-cbc` and
 `aes256-cbc`, RSA keys under 1024 bits, or SSH protocol 1. A device that offers
 only these fails with an error naming what it offered and the fix on the
 device, such as `crypto key generate rsa modulus 2048` or `ip ssh version 2`.
