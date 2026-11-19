@@ -150,18 +150,21 @@ an ssh-agent key is offered only when it matches an `IdentityFile`.
 
 Any other keyword that could change which host is reached or how it
 authenticates fails the connection and names the keyword, file and line.
-Cosmetic keywords such as `Compression`, `ConnectTimeout` and `LogLevel`, and
-the algorithm lists (see [Old gear](#old-gear)), are ignored. `ProxyCommand` is not supported; use `ProxyJump`.
+Cosmetic keywords such as `Compression`, `ConnectTimeout` and `LogLevel` are
+ignored, and so are the algorithm lists except a `-` list (see
+[Old gear](#old-gear)). `ProxyCommand` is not supported; use `ProxyJump`.
 
 ### Old gear
 
 Old switches connect with no configuration. stcli offers strong algorithms
 first and obsolete ones (`ssh-rsa`, SHA-1 key exchange such as
 `diffie-hellman-group1-sha1`, CBC ciphers, RC4) after them, so a device that
-speaks anything strong gets it. An RSA login key signs with SHA-1 only for a
-device that accepts nothing else. stcli warns once per connection, naming the
-obsolete algorithms the device actually negotiated. The algorithm lists in
-`~/.ssh/config` are ignored.
+speaks anything strong gets it. An RSA login key signs with SHA-1 when the
+device does not advertise SHA-2 support. stcli warns once per connection, naming
+the obsolete algorithms the device actually negotiated.
+
+In `~/.ssh/config`, a `-` algorithm list removes those algorithms, for example
+`Ciphers -*-cbc`. Other algorithm lists are ignored.
 
 stcli cannot speak DSA keys (`ssh-dss`), MD5, `aes192-cbc` and
 `aes256-cbc`, RSA keys under 1024 bits, or SSH protocol 1. A device that offers
