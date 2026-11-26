@@ -138,11 +138,12 @@ runs in PowerShell, and destructive cmdlets such as `Remove-Item -Recurse` or
 `Format-Volume` ask for the phrase too.
 
 On platforms configured line by line, such as SONiC, Fortinet FortiOS or a Linux
-host, a change of several commands arrives as one batch: a single dialog lists every command with
-its class, its purpose and any rollback, `y` runs them in order and `n` runs
-none. Read-only commands in it never open the dialog. The batch stops at the
-first command that fails, `esc` stops it after the running command finishes,
-and a destructive command is never batched: it asks for its phrase on its own.
+host, a change of several commands arrives as one batch: a single dialog lists
+every command with its class, its purpose and any rollback, `y` runs them in
+order and `n` runs none. Read-only commands in it never open the dialog. The
+batch stops at the first command that fails, `esc` stops it after the running
+command finishes, and a destructive command is never batched: it asks for its
+phrase on its own.
 
 A configuration change of more than one line arrives as one block, not one
 command at a time. stcli stages it in the device's own configuration session,
