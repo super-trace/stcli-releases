@@ -28,9 +28,28 @@ changes.
   architecture; never a hostname, command, device output or credential. Set
   `STCLI_NO_CRASH_REPORTS=1` or `DO_NOT_TRACK=1` to turn them off.
 
-Platforms with their own rule tables: Junos, Cisco IOS-XE, Cisco NX-OS, Arista
-EOS, Nokia SR Linux, Ciena SAOS 10, SONiC, and Linux. Anything else runs under the
-strictest table.
+## Supported platforms
+
+stcli classifies commands on a rule table written for each platform below.
+Anything else still connects and runs under the strictest table.
+
+| Platform                | Multi-line changes                       |
+| ----------------------- | ---------------------------------------- |
+| Juniper Junos           | Staged on the device, reviewed as a diff |
+| Arista EOS              | Staged on the device, reviewed as a diff |
+| Nokia SR Linux          | Staged on the device, reviewed as a diff |
+| Cisco IOS-XE            | One approved batch                       |
+| Cisco NX-OS             | One approved batch                       |
+| Ciena SAOS 10           | One approved batch                       |
+| SONiC                   | One approved batch                       |
+| Fortinet FortiOS        | One approved batch                       |
+| MikroTik RouterOS 7.21+ | One approved batch                       |
+| NVIDIA Cumulus Linux    | One approved batch                       |
+| Linux                   | One approved batch                       |
+
+Both kinds of change are described under [Approvals](#approvals). Missing
+yours? [Open an issue](https://github.com/super-trace/stcli-releases/issues/new/choose)
+with the vendor and OS version.
 
 ## Install
 
@@ -137,12 +156,13 @@ or running a local command, opens its own dialog. On Windows a local command
 runs in PowerShell, and destructive cmdlets such as `Remove-Item -Recurse` or
 `Format-Volume` ask for the phrase too.
 
-On platforms configured line by line, such as SONiC or a Linux host, a change of
-several commands arrives as one batch: a single dialog lists every command with
-its class, its purpose and any rollback, `y` runs them in order and `n` runs
-none. Read-only commands in it never open the dialog. The batch stops at the
-first command that fails, `esc` stops it after the running command finishes,
-and a destructive command is never batched: it asks for its phrase on its own.
+On platforms configured line by line, such as SONiC, Fortinet FortiOS or a Linux
+host, a change of several commands arrives as one batch: a single dialog lists
+every command with its class, its purpose and any rollback, `y` runs them in
+order and `n` runs none. Read-only commands in it never open the dialog. The
+batch stops at the first command that fails, `esc` stops it after the running
+command finishes, and a destructive command is never batched: it asks for its
+phrase on its own.
 
 A configuration change of more than one line arrives as one block, not one
 command at a time. stcli stages it in the device's own configuration session,
