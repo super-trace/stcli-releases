@@ -33,17 +33,19 @@ changes.
 stcli classifies commands on a rule table written for each platform below.
 Anything else still connects and runs under the strictest table.
 
-| Platform         | Multi-line changes                         |
-| ---------------- | ------------------------------------------ |
-| Juniper Junos    | Staged on the device, reviewed as a diff   |
-| Arista EOS       | Staged on the device, reviewed as a diff   |
-| Nokia SR Linux   | Staged on the device, reviewed as a diff   |
-| Cisco IOS-XE     | One approved batch                         |
-| Cisco NX-OS      | One approved batch                         |
-| Ciena SAOS 10    | One approved batch                         |
-| SONiC            | One approved batch                         |
-| Fortinet FortiOS | One approved batch                         |
-| Linux            | One approved batch                         |
+| Platform                | Multi-line changes                       |
+| ----------------------- | ---------------------------------------- |
+| Juniper Junos           | Staged on the device, reviewed as a diff |
+| Arista EOS              | Staged on the device, reviewed as a diff |
+| Nokia SR Linux          | Staged on the device, reviewed as a diff |
+| Cisco IOS-XE            | One approved batch                       |
+| Cisco NX-OS             | One approved batch                       |
+| Ciena SAOS 10           | One approved batch                       |
+| SONiC                   | One approved batch                       |
+| Fortinet FortiOS        | One approved batch                       |
+| MikroTik RouterOS 7.21+ | One approved batch                       |
+| NVIDIA Cumulus Linux    | One approved batch                       |
+| Linux                   | One approved batch                       |
 
 Both kinds of change are described under [Approvals](#approvals). Missing
 yours? [Open an issue](https://github.com/super-trace/stcli-releases/issues/new/choose)
